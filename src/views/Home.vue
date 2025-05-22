@@ -126,51 +126,30 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue';
-
-const loading = ref(false);
-const error = ref(null);
-
-const hasError = computed(() => {
-  return error.value !== null;
-});
-
-const isDataEmpty = computed(() => {
-  return Object.keys(data.value).length === 0;
-});
-
-const fetchData = async () => {
-  loading.value = true;
-  error.value = null;
-  try {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // 获取数据逻辑
-  } catch (err) {
-    error.value = '获取数据失败，请稍后重试';
-    console.error('Error fetching data:', err);
-  } finally {
-    loading.value = false;
-  }
-};
-
-fetchData();
+import { ref, computed, onMounted } from 'vue';
+import { getAllDreams, getCategories } from '../mockData.js'; // Correct path
 
 export default {
   name: 'Home',
   setup() {
-      const stats = ref({
-      totalDreams: 42,
-      monthlyDreams: 12,
-      sentiment: 85,
-      activityScore: 92,
-      emotionDistribution: [
+    const loading = ref(false);
+    const error = ref(null);
+    const allDataLoaded = ref(false); // To track if initial data load is complete
+
+    const stats = ref({
+      totalDreams: 0,
+      monthlyDreams: 0,
+      // Keeping these as placeholders, primary goal is totalDreams and monthlyDreams
+      sentiment: 85, // Placeholder
+      activityScore: 92, // Placeholder
+      emotionDistribution: [ // Placeholder
         { name: '喜悦', percentage: 35, color: 'bg-yellow-400/50' },
         { name: '平静', percentage: 25, color: 'bg-blue-400/50' },
         { name: '焦虑', percentage: 20, color: 'bg-purple-400/50' },
         { name: '困惑', percentage: 15, color: 'bg-pink-400/50' },
         { name: '其他', percentage: 5, color: 'bg-gray-400/50' }
       ],
-      weeklyTrend: [
+      weeklyTrend: [ // Placeholder
         { date: '2024-01-10', count: 3, label: '一' },
         { date: '2024-01-11', count: 5, label: '二' },
         { date: '2024-01-12', count: 4, label: '三' },
@@ -181,56 +160,83 @@ export default {
       ]
     });
 
-    const recentDreams = ref([
-      {
-        id: 1,
-        title: '星空漫游',
-        date: '2024-01-15',
-        content: '我梦见自己在浩瀚的星空中漫游，周围是绚丽的星云和闪烁的星辰...'
-      },
-      {
-        id: 2,
-        title: '海底城市',
-        date: '2024-01-14',
-        content: '在梦中，我发现了一座建在深海中的未来城市，到处都是发光的建筑和水下花园...'
-      }
-    ]);
+    const recentDreams = ref([]);
+    const latestDreams = ref([]);
+    const popularCategories = ref([]);
 
-    const latestDreams = ref([
-      {
-        id: 1,
-        title: '星空漫游',
-        date: '2024-01-15',
-        content: '我梦见自己在浩瀚的星空中漫游，周围是绚丽的星云和闪烁的星辰...'
-      },
-      {
-        id: 2,
-        title: '海底城市',
-        date: '2024-01-14',
-        content: '在梦中，我发现了一座建在深海中的未来城市，到处都是发光的建筑和水下花园...'
-      }
-    ]);
+    const hasError = computed(() => error.value !== null);
 
-    const popularCategories = ref([
-      {
-        id: 1,
-        name: '奇幻冒险',
-        description: '探索未知的奇幻世界',
-        details: '包含各种奇异的冒险梦境，充满想象力和创造力。'
-      },
-      {
-        id: 2,
-        name: '未来科技',
-        description: '体验未来科技的梦境',
-        details: '关于未来科技、人工智能和虚拟现实的梦境。'
+    const isDataEmpty = computed(() => {
+      return !loading.value && allDataLoaded.value && recentDreams.value.length === 0 && popularCategories.value.length === 0;
+    });
+
+    const fetchData = async () => {
+      loading.value = true;
+      error.value = null;
+      allDataLoaded.value = false;
+      try {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 500)); // Reduced delay
+
+        const dreams = getAllDreams();
+        const categories = getCategories();
+
+        // Calculate total dreams
+        stats.value.totalDreams = dreams.length;
+
+        // Calculate monthly dreams
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth(); // 0-indexed
+
+        stats.value.monthlyDreams = dreams.filter(dream => {
+          const dreamDate = new Date(dream.date);
+          return dreamDate.getFullYear() === currentYear && dreamDate.getMonth() === currentMonth;
+        }).length;
+
+        // Populate latest/recent dreams (top 3-4 most recent)
+        const sortedDreams = [...dreams].sort((a, b) => new Date(b.date) - new Date(a.date));
+        latestDreams.value = sortedDreams.slice(0, 4); // Show 4 latest dreams
+        recentDreams.value = sortedDreams.slice(0, 4); // Can be the same or different logic if needed
+
+        // Populate popular categories
+        // The mockCategories from mockData.js has: id, name, description, image, dreamCount
+        // The template uses category.description and category.details
+        // We will use category.description for both if details is not present.
+        popularCategories.value = categories.map(category => ({
+          ...category,
+          details: category.description // Using description as details
+        })).slice(0, 4); // Show 4 popular categories
+
+        allDataLoaded.value = true;
+      } catch (err) {
+        error.value = '获取数据失败，请稍后重试';
+        console.error('Error fetching data:', err);
+        // Ensure refs are in a consistent empty state on error
+        stats.value.totalDreams = 0;
+        stats.value.monthlyDreams = 0;
+        latestDreams.value = [];
+        recentDreams.value = [];
+        popularCategories.value = [];
+      } finally {
+        loading.value = false;
       }
-    ]);
+    };
+
+    onMounted(() => {
+      fetchData();
+    });
 
     return {
+      loading,
+      error,
+      hasError,
+      isDataEmpty,
       stats,
       recentDreams,
       latestDreams,
-      popularCategories
+      popularCategories,
+      fetchData // Expose fetchData for retry button
     };
   }
 }
