@@ -29,19 +29,18 @@
                hover:shadow-2xl hover:shadow-purple-500/60 hover:scale-102"
         @click="navigateToCategory(category.id)"
       >
-        <div class="aspect-w-16 aspect-h-9 rounded-xl overflow-hidden"> {/* Added overflow-hidden here for cleaner image scaling */}
+        <div class="aspect-w-16 aspect-h-9 rounded-xl overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 z-10"></div>
           <img
             :src="category.image"
             :alt="category.name"
             class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500 ease-in-out"
           />
-          {/* The existing dynamic background is fine, group-hover is already handled */}
           <div class="absolute inset-0 bg-gradient-to-t from-transparent via-purple-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         </div>
-        <div class="absolute left-0 right-0 p-4 z-20 transform translate-y-0"> {/* Content part */}
+        <div class="absolute left-0 right-0 p-4 z-20 transform translate-y-0">
           <h3 class="text-2xl font-bold text-white mb-2">{{ category.name }}</h3>
-          <p class="text-gray-200 mb-4 line-clamp-2">{{ category.description }}</p> {/* Added line-clamp for consistency */}
+          <p class="text-gray-200 mb-4 line-clamp-2">{{ category.description }}</p>
           <div class="flex items-center text-white">
             <span class="mr-2">{{ category.dreamCount }}个梦境</span>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:translate-x-2 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
