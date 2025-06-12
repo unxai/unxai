@@ -5,7 +5,7 @@
         <!-- 将 logo 放在最左侧 -->
         <div class="flex-shrink-0 flex items-center">
           <router-link to="/" class="hover:scale-105 transition-transform duration-300">
-            <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 animate-text">UnXAI</h1>
+            <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 animate-text">Dreams</h1>
           </router-link>
         </div>
         <!-- 其他导航项保持居中 -->
