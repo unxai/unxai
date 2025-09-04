@@ -24,14 +24,6 @@
     <div class="neural-network" id="neuralNetwork"></div>
     <div class="data-stream" id="dataStream"></div>
     <div class="digital-rain" id="digitalRain"></div>
-    <div class="scan-line"></div>
-    
-    <!-- 能量波纹 -->
-    <div class="energy-waves">
-        <div class="wave"></div>
-        <div class="wave"></div>
-        <div class="wave"></div>
-    </div>
 
     <!-- HUD界面元素 -->
     <div class="hud-elements">
@@ -39,7 +31,6 @@
         <div class="hud-corner top-right"></div>
         <div class="hud-corner bottom-left"></div>
         <div class="hud-corner bottom-right"></div>
-        <div class="status-bar">SYSTEM ONLINE</div>
     </div>
 
     <div class="container">
@@ -47,6 +38,7 @@
         <header class="header">
             <div class="logo">
                 <div class="logo-icon">
+                    <div class="logo-shadow"></div>
                     <img src="./assets/logo.png" alt="UNXAI Logo">
                 </div>
             </div>
@@ -54,9 +46,15 @@
 
         <!-- 主要内容 -->
         <main class="hero">
-            <h1>UNXAI</h1>
-            <p>未知无限 · 探索AI</p>
-            <div class="subtitle">Unknown Unlimited · Exploring Artificial Intelligence</div>
+            <h1 class="typing-enhanced">UNXAI</h1>
+            <p class="typing-enhanced">未知无限 · 探索AI</p>
+            <div class="subtitle typing-enhanced">Unknown Unlimited · Exploring Artificial Intelligence</div>
+            
+            <!-- 简化交互提示 -->
+            <div class="interaction-hints">
+                <div>🎮 点击屏幕任意位置触发爆炸效果</div>
+                <div>⌨️ 快捷键: F-全屏 | G-故障 | 空格-能量爆发 | ESC-主题切换</div>
+            </div>
         </main>
     </div>
 
@@ -74,8 +72,8 @@
             </div>
             <div class="footer-right">
                 <div class="social-links">
-                    <a href="https://github.com/unxai" target="_blank" class="social-link">
-                        <span>📧</span>
+                    <a href="https://github.com/unxai" target="_blank" class="social-link" title="访问 UNXAI GitHub 组织">
+                        <span>🔗 GitHub</span>
                     </a>
                 </div>
             </div>

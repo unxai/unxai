@@ -1,174 +1,191 @@
-/* UNXAI - 科技感网站样式 */
+/* UNXAI 组织展示页样式 */
 
+/* === 基础样式重置 === */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body {
-    font-family: 'Inter', sans-serif;
-    background: #000000;
-    color: #ffffff;
+html, body {
+    height: 100%;
     overflow-x: hidden;
-    min-height: 100vh;
-    cursor: none;
 }
 
-/* 自定义光标 */
+body {
+    font-family: 'Inter', sans-serif;
+    background: #0f0f0f; /* 提升基础亮度 */
+    color: #fff;
+    cursor: none;
+    line-height: 1.6;
+}
+
+/* === 自定义光标 === */
 .custom-cursor {
-    position: fixed;
     width: 20px;
     height: 20px;
     border: 2px solid #00d4ff;
     border-radius: 50%;
-    background: rgba(0, 212, 255, 0.1);
+    position: fixed;
     pointer-events: none;
     z-index: 9999;
+    transform: translate(-50%, -50%);
     transition: all 0.1s ease;
-    mix-blend-mode: difference;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
 }
 
-.custom-cursor.active {
-    transform: scale(1.5);
-    background: rgba(0, 212, 255, 0.3);
+.custom-cursor::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    background: #00d4ff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
 }
 
-/* 动态背景 */
+/* === 动态背景系统 === */
 .background {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
+    z-index: -5;
     background: 
-        radial-gradient(circle at 20% 80%, rgba(0, 212, 255, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 0, 150, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(0, 255, 127, 0.08) 0%, transparent 50%),
-        linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 50%, #0a1a2e 100%);
-    animation: backgroundPulse 8s ease-in-out infinite;
+        radial-gradient(circle at 20% 80%, rgba(0, 212, 255, 0.25) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 0, 150, 0.18) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(0, 255, 127, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 60% 70%, rgba(138, 43, 226, 0.12) 0%, transparent 40%),
+        linear-gradient(135deg, #1a1a1a 0%, #2a1a2a 30%, #1a2a3e 70%, #0f1419 100%);
+    animation: backgroundPulse 10s ease-in-out infinite;
 }
 
 @keyframes backgroundPulse {
-    0%, 100% {
-        filter: brightness(1) contrast(1);
-    }
-    50% {
-        filter: brightness(1.1) contrast(1.2);
-    }
+    0%, 100% { filter: brightness(1) hue-rotate(0deg) contrast(1.1); }
+    33% { filter: brightness(1.3) hue-rotate(20deg) contrast(1.2); }
+    66% { filter: brightness(1.1) hue-rotate(-10deg) contrast(1.15); }
 }
 
-/* 网格背景 */
+/* === 网格覆盖层 === */
 .grid-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
-    background-image:
-        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-        radial-gradient(circle at 25% 25%, rgba(0, 255, 127, 0.02) 2px, transparent 2px),
-        radial-gradient(circle at 75% 75%, rgba(255, 0, 150, 0.02) 2px, transparent 2px);
-    background-size: 50px 50px, 50px 50px, 100px 100px, 150px 150px;
-    animation: gridMove 20s linear infinite, gridFlicker 4s ease-in-out infinite;
-}
-
-@keyframes gridFlicker {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.7;
-    }
+    z-index: -4;
+    background-image: 
+        linear-gradient(rgba(0, 212, 255, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.15) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: gridMove 25s linear infinite;
+    opacity: 0.8;
 }
 
 @keyframes gridMove {
-    0% {
-        transform: translate(0, 0);
-    }
-    100% {
-        transform: translate(50px, 50px);
-    }
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
 }
 
-/* 粒子系统 */
+/* === 粒子系统 - 简化版 === */
 .particles {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
+    z-index: -3;
+    pointer-events: none;
+    opacity: 0.9;
 }
 
 .particle {
     position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #00d4ff;
     border-radius: 50%;
-    opacity: 0;
-    filter: blur(0.5px);
-}
-
-.particle.small {
-    width: 1px;
-    height: 1px;
-    animation: particleFloat 12s infinite linear;
-}
-
-.particle.medium {
-    width: 3px;
-    height: 3px;
-    animation: particleFloat 8s infinite linear;
     box-shadow: 
         0 0 6px currentColor,
-        0 0 12px currentColor,
+        0 0 12px rgba(0, 212, 255, 0.6),
         0 0 18px rgba(0, 212, 255, 0.3);
-    border-radius: 50%;
-}
-
-.particle.large {
-    width: 5px;
-    height: 5px;
-    animation: particleFloat 6s infinite linear, particlePulse 2s ease-in-out infinite;
-    box-shadow: 
-        0 0 12px currentColor,
-        0 0 24px currentColor,
-        0 0 36px rgba(0, 212, 255, 0.4);
-    border-radius: 50%;
-}
-
-@keyframes particlePulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 0.8;
-    }
-    50% {
-        transform: scale(1.2);
-        opacity: 1;
-    }
+    animation: particleFloat 20s infinite linear;
 }
 
 @keyframes particleFloat {
     0% {
-        opacity: 0;
         transform: translateY(100vh) translateX(0) scale(0);
+        opacity: 0;
     }
-    5% {
+    10% {
         opacity: 1;
-        transform: translateY(95vh) translateX(10px) scale(1);
+        transform: scale(1);
     }
-    95% {
-        opacity: 0.8;
+    90% {
+        opacity: 1;
     }
     100% {
+        transform: translateY(-100vh) translateX(50px) scale(0);
         opacity: 0;
-        transform: translateY(-5vh) translateX(100px) scale(0);
     }
 }
 
-/* 数据流效果 */
+/* === 神经网络动画 - 简化版 === */
+.neural-network {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.neural-node {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: #00d4ff;
+    border-radius: 50%;
+    box-shadow: 
+        0 0 10px currentColor,
+        0 0 20px rgba(0, 212, 255, 0.5),
+        0 0 30px rgba(0, 212, 255, 0.2);
+    animation: nodeFlicker 4s ease-in-out infinite;
+}
+
+.neural-line {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.8), transparent);
+    transform-origin: left center;
+    animation: neuralPulse 6s ease-in-out infinite;
+    opacity: 0.4;
+    box-shadow: 0 0 3px rgba(0, 212, 255, 0.6);
+}
+
+.neural-line.active {
+    background: linear-gradient(90deg, transparent, rgba(255, 0, 150, 0.8), transparent);
+    animation-duration: 4s;
+    opacity: 0.6;
+    box-shadow: 0 0 5px rgba(255, 0, 150, 0.6);
+}
+
+@keyframes nodeFlicker {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+}
+
+@keyframes neuralPulse {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 0.6; }
+}
+
+/* === 数据流效果 === */
 .data-stream {
     position: fixed;
     top: 0;
@@ -177,616 +194,384 @@ body {
     height: 100%;
     z-index: -1;
     pointer-events: none;
+    opacity: 0.5;
 }
 
-.stream-line {
+.data-flow {
     position: absolute;
     font-family: 'Courier New', monospace;
-    font-size: 12px;
-    color: #00d4ff;
-    opacity: 0;
+    font-size: 11px;
+    color: #00ff7f;
     white-space: nowrap;
-    animation: streamFlow 15s infinite linear;
-}
-
-@keyframes streamFlow {
-    0% {
-        opacity: 0;
-        transform: translateY(100vh) translateX(-100px);
-    }
-    5% {
-        opacity: 0.7;
-    }
-    95% {
-        opacity: 0.3;
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-100px) translateX(50px);
-    }
-}
-
-/* 神经网络连线效果 */
-.neural-network {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    pointer-events: none;
-}
-
-.neural-node {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: #00d4ff;
-    border-radius: 50%;
-    box-shadow: 0 0 10px #00d4ff;
-    animation: nodeFlicker 3s infinite ease-in-out;
-}
-
-.neural-line {
-    position: absolute;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.6), transparent);
-    opacity: 0;
-    animation: neuralPulse 6s infinite ease-in-out;
-}
-
-.neural-line.active {
-    background: linear-gradient(90deg, transparent, rgba(255, 0, 150, 0.8), transparent);
-    box-shadow: 0 0 4px rgba(255, 0, 150, 0.5);
-}
-
-@keyframes neuralPulse {
-    0%, 90%, 100% {
-        opacity: 0;
-        transform: scaleX(0.1);
-    }
-    10%, 80% {
-        opacity: 0.8;
-        transform: scaleX(1);
-    }
-}
-
-@keyframes nodeFlicker {
-    0%, 100% {
-        opacity: 0.3;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.5);
-    }
-}
-
-/* 全息扫描线 */
-.scan-line {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(0, 255, 127, 0.8) 50%, 
-        transparent 100%);
-    z-index: 1;
-    animation: scanMove 8s infinite ease-in-out;
-    box-shadow: 0 0 20px rgba(0, 255, 127, 0.5);
-}
-
-@keyframes scanMove {
-    0%, 10% {
-        top: 0;
-        opacity: 0;
-    }
-    20%, 80% {
-        opacity: 1;
-    }
-    90%, 100% {
-        top: 100%;
-        opacity: 0;
-    }
-}
-
-@keyframes rainFall {
-    0% {
-        opacity: 0;
-        transform: translateY(-100vh);
-    }
-    10% {
-        opacity: 1;
-    }
-    90% {
-        opacity: 0.8;
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(100vh);
-    }
-}
-
-/* 3D透视效果 */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    position: relative;
-    z-index: 1;
-    perspective: 1000px;
-}
-
-/* 头部区域 */
-.header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 0 20px 0;
-    position: relative;
-    z-index: 10;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.logo-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    overflow: hidden;
-    position: relative;
-    background: linear-gradient(45deg, #00d4ff, #0099cc, #ff0096);
-    padding: 3px;
-    animation: logoRotate 10s linear infinite;
-}
-
-.logo-icon::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, #00d4ff, #ff0096, #00ff7f, #00d4ff);
-    border-radius: 50%;
-    z-index: -1;
-    animation: logoGlow 3s ease-in-out infinite alternate;
-    filter: blur(4px);
-}
-
-.logo-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-    position: relative;
-    z-index: 1;
-}
-
-@keyframes logoRotate {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes logoGlow {
-    from {
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
-        opacity: 0.8;
-    }
-    to {
-        box-shadow: 
-            0 0 40px rgba(0, 212, 255, 0.8),
-            0 0 80px rgba(255, 0, 150, 0.3);
-        opacity: 1;
-    }
-}
-
-.logo-text {
-    font-family: 'Orbitron', monospace;
-    font-size: 24px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 2px;
-}
-
-/* 主要内容区域 */
-.hero {
-    text-align: center;
-    padding: 120px 0 140px 0;
-    position: relative;
-    min-height: calc(100vh - 60px);
-}
-
-.hero h1 {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(3rem, 8vw, 7rem);
-    font-weight: 900;
-    margin-bottom: 30px;
-    background: linear-gradient(135deg, #ffffff, #00d4ff, #ff0096, #00ff7f);
-    background-size: 400% 400%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: gradientShift 6s ease-in-out infinite;
-    position: relative;
-    letter-spacing: 2px;
+    animation: dataMove 20s linear infinite;
     text-shadow: 
-        0 0 10px rgba(0, 212, 255, 0.5),
-        0 0 20px rgba(0, 212, 255, 0.3),
-        0 0 40px rgba(0, 212, 255, 0.2);
-    filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.4));
+        0 0 8px currentColor,
+        0 0 16px rgba(0, 255, 127, 0.6),
+        0 0 24px rgba(0, 255, 127, 0.3);
 }
 
-.hero h1::before {
-    content: 'UNXAI';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, transparent, #00d4ff, transparent);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    opacity: 0;
-    animation: glitchEffect 8s infinite;
+@keyframes dataMove {
+    0% { transform: translateX(-100px); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateX(100vw); opacity: 0; }
 }
 
-.hero h1::after {
-    content: '';
-    position: absolute;
-    top: -5px;
-    left: -5px;
-    right: -5px;
-    bottom: -5px;
-    background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
-    z-index: -1;
-    animation: haloEffect 4s ease-in-out infinite;
-}
-
-@keyframes gradientShift {
-    0%, 100% {
-        background-position: 0% 50%;
-    }
-    25% {
-        background-position: 100% 0%;
-    }
-    50% {
-        background-position: 100% 100%;
-    }
-    75% {
-        background-position: 0% 100%;
-    }
-}
-
-@keyframes glitchEffect {
-    0%, 90%, 100% {
-        opacity: 0;
-        transform: translate(0, 0);
-    }
-    92% {
-        opacity: 0.8;
-        transform: translate(2px, -2px);
-    }
-    94% {
-        opacity: 0.6;
-        transform: translate(-2px, 2px);
-    }
-    96% {
-        opacity: 0.9;
-        transform: translate(1px, -1px);
-    }
-}
-
-@keyframes haloEffect {
-    0%, 100% {
-        opacity: 0.3;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 0.6;
-        transform: scale(1.1);
-    }
-}
-
-.hero p {
-    font-size: 1.8rem;
-    color: #ffffff;
-    margin-bottom: 20px;
-    opacity: 0;
-    animation: fadeInUp 1s ease 0.5s forwards;
-    text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
-    position: relative;
-}
-
-.hero p::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -20px;
-    width: 4px;
-    height: 2px;
-    background: #00d4ff;
-    animation: textCursor 1s infinite;
-}
-
-@keyframes textCursor {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-}
-
-.subtitle {
-    font-size: 1.3rem;
-    color: #00ff7f;
-    margin-bottom: 50px;
-    opacity: 0;
-    animation: fadeInUp 1s ease 1s forwards;
-    font-weight: 300;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    position: relative;
-}
-
-.subtitle::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #00ff7f, transparent);
-    animation: lineGrow 2s ease 1.5s forwards;
-}
-
-@keyframes lineGrow {
-    from {
-        width: 0;
-    }
-    to {
-        width: 200px;
-    }
-}
-
-/* HUD 界面元素 */
-.hud-elements {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 2;
-}
-
-.hud-corner {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    animation: hudBreathe 3s ease-in-out infinite;
-}
-
-@keyframes hudBreathe {
-    0%, 100% {
-        opacity: 0.6;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.05);
-    }
-}
-
-.hud-corner.top-left {
-    top: 20px;
-    left: 20px;
-    border-top: 2px solid rgba(0, 212, 255, 0.6);
-    border-left: 2px solid rgba(0, 212, 255, 0.6);
-}
-
-.hud-corner.top-right {
-    top: 20px;
-    right: 20px;
-    border-top: 2px solid rgba(0, 212, 255, 0.6);
-    border-right: 2px solid rgba(0, 212, 255, 0.6);
-}
-
-.hud-corner.bottom-left {
-    bottom: 20px;
-    left: 20px;
-    border-bottom: 2px solid rgba(0, 212, 255, 0.6);
-    border-left: 2px solid rgba(0, 212, 255, 0.6);
-}
-
-.hud-corner.bottom-right {
-    bottom: 20px;
-    right: 20px;
-    border-bottom: 2px solid rgba(0, 212, 255, 0.6);
-    border-right: 2px solid rgba(0, 212, 255, 0.6);
-}
-
-.status-bar {
-    position: absolute;
-    top: 20px;
-    right: 60px;
-    padding: 8px 16px;
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: 20px;
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    color: #00d4ff;
-    backdrop-filter: blur(10px);
-    box-shadow: 
-        0 0 20px rgba(0, 212, 255, 0.2),
-        inset 0 0 20px rgba(0, 212, 255, 0.1);
-    animation: statusGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes statusGlow {
-    0% {
-        box-shadow: 
-            0 0 20px rgba(0, 212, 255, 0.2),
-            inset 0 0 20px rgba(0, 212, 255, 0.1);
-    }
-    100% {
-        box-shadow: 
-            0 0 30px rgba(0, 212, 255, 0.4),
-            inset 0 0 30px rgba(0, 212, 255, 0.2);
-    }
-}
-
-.status-bar::before {
-    content: '●';
-    color: #00ff7f;
-    margin-right: 8px;
-    animation: blink 2s infinite;
-}
-
-@keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0.3; }
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* 数字雨效果 */
+/* === 数字雨效果 === */
 .digital-rain {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
     z-index: -1;
-    opacity: 0.1;
+    pointer-events: none;
+    opacity: 0.25;
 }
 
 .rain-column {
     position: absolute;
     font-family: 'Courier New', monospace;
     font-size: 14px;
-    color: #00d4ff;
-    white-space: pre;
-    animation: rainFall 8s infinite linear;
+    color: #00ff41;
+    animation: rainFall 12s linear infinite;
     text-shadow: 
-        0 0 5px currentColor,
-        0 0 10px currentColor,
-        0 0 15px rgba(0, 212, 255, 0.5);
+        0 0 6px currentColor,
+        0 0 12px rgba(0, 255, 65, 0.6),
+        0 0 18px rgba(0, 255, 65, 0.3);
 }
 
-/* 能量波纹效果 */
-.energy-waves {
+@keyframes rainFall {
+    0% { transform: translateY(-100vh); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* === HUD界面元素 - 简化版 === */
+.hud-elements {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    width: 300px;
-    height: 300px;
-    transform: translate(-50%, -50%);
-    z-index: -1;
-    pointer-events: none;
-}
-
-.wave {
-    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    border: 2px solid rgba(0, 212, 255, 0.1);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.hud-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 1px solid rgba(0, 212, 255, 0.4);
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+}
+
+.hud-corner.top-left {
+    top: 30px;
+    left: 30px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.hud-corner.top-right {
+    top: 30px;
+    right: 30px;
+    border-left: none;
+    border-bottom: none;
+}
+
+.hud-corner.bottom-left {
+    bottom: 80px;
+    left: 30px;
+    border-right: none;
+    border-top: none;
+}
+
+.hud-corner.bottom-right {
+    bottom: 80px;
+    right: 30px;
+    border-left: none;
+    border-top: none;
+}
+
+
+@keyframes statusBreathe {
+    0%, 100% { 
+        box-shadow: 0 0 5px rgba(0, 212, 255, 0.2);
+        border-color: rgba(0, 212, 255, 0.3);
+    }
+    50% { 
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        border-color: rgba(0, 212, 255, 0.6);
+    }
+}
+
+/* === 主容器 === */
+.container {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 2;
+}
+
+/* === 头部Logo === */
+.header {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+}
+
+.logo-icon {
+    position: relative;
+    display: inline-block;
+    perspective: 1000px;
+    width: 100px;
+    height: 100px;
+}
+
+.logo-icon img {
+    width: 60px;
+    height: 60px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    animation: logoFloat 4s ease-in-out infinite;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 创建3D球体作为logo背景 */
+.logo-icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    transform: translate(-50%, -50%);
+    background: 
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(0, 212, 255, 0.4), transparent 60%),
+        radial-gradient(circle at 50% 50%, rgba(0, 150, 255, 0.6), rgba(0, 50, 150, 0.8));
     border-radius: 50%;
-    animation: waveExpand 4s ease-out infinite;
+    box-shadow: 
+        inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+        inset 8px 8px 16px rgba(255, 255, 255, 0.1),
+        0 0 30px rgba(0, 212, 255, 0.6),
+        0 0 60px rgba(0, 212, 255, 0.4),
+        0 8px 32px rgba(0, 0, 0, 0.4);
+    animation: sphereFloat 4s ease-in-out infinite;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 1;
 }
 
-.wave:nth-child(2) {
-    animation-delay: 1s;
-    border-color: rgba(255, 0, 150, 0.1);
+/* 球体周围的能量环 */
+.logo-icon .sphere-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    transform: translate(-50%, -50%) rotateX(75deg);
+    border: 2px solid transparent;
+    border-top: 2px solid rgba(0, 212, 255, 0.6);
+    border-radius: 50%;
+    animation: ringRotate 6s linear infinite;
+    z-index: 0;
 }
 
-.wave:nth-child(3) {
-    animation-delay: 2s;
-    border-color: rgba(0, 255, 127, 0.1);
+/* 第二个能量环 */
+.logo-icon .sphere-ring-2 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 140px;
+    height: 140px;
+    transform: translate(-50%, -50%) rotateX(75deg) rotateY(45deg);
+    border: 1px solid transparent;
+    border-top: 1px solid rgba(255, 0, 150, 0.4);
+    border-radius: 50%;
+    animation: ringRotate 8s linear infinite reverse;
+    z-index: 0;
 }
 
-@keyframes waveExpand {
-    0% {
-        transform: scale(0);
+@keyframes logoFloat {
+    0%, 100% { 
+        transform: translate(-50%, -50%) translateY(0px);
+    }
+    50% { 
+        transform: translate(-50%, -50%) translateY(-8px);
+    }
+}
+
+@keyframes sphereFloat {
+    0%, 100% { 
+        transform: translate(-50%, -50%) translateY(0px) rotateY(0deg);
+    }
+    50% { 
+        transform: translate(-50%, -50%) translateY(-8px) rotateY(180deg);
+    }
+}
+
+@keyframes ringRotate {
+    0% { transform: translate(-50%, -50%) rotateX(75deg) rotateZ(0deg); }
+    100% { transform: translate(-50%, -50%) rotateX(75deg) rotateZ(360deg); }
+}
+
+/* 球体背景光晕 */
+.logo-sphere-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150px;
+    height: 150px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+        circle, 
+        rgba(0, 212, 255, 0.2) 0%, 
+        rgba(0, 212, 255, 0.1) 40%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    animation: glowPulse 4s ease-in-out infinite;
+    z-index: -1;
+}
+
+@keyframes glowPulse {
+    0%, 100% { 
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% { 
         opacity: 1;
-    }
-    100% {
-        transform: scale(2);
-        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.2);
     }
 }
 
-/* 底部状态栏 */
+/* === 主要内容区域 === */
+.hero {
+    text-align: center;
+    max-width: 800px;
+    margin-top: 100px;
+}
+
+.hero h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 4rem;
+    font-weight: 900;
+    margin-bottom: 20px;
+    background: linear-gradient(45deg, #00d4ff, #ff0096, #00ff7f, #8a2be2);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 8s ease-in-out infinite;
+    letter-spacing: 4px;
+    text-shadow: 
+        0 0 20px rgba(0, 212, 255, 0.6),
+        0 0 40px rgba(255, 0, 150, 0.4),
+        0 0 60px rgba(0, 255, 127, 0.3);
+    filter: 
+        drop-shadow(0 0 30px rgba(0, 212, 255, 0.5))
+        drop-shadow(0 0 60px rgba(255, 0, 150, 0.3));
+}
+
+.hero p {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #fff;
+    font-weight: 300;
+    opacity: 0.9;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #00d4ff;
+    margin-bottom: 40px;
+    opacity: 0.8;
+    font-style: italic;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* === 打字机效果 === */
+.typing-enhanced {
+    overflow: hidden;
+    border-right: 3px solid #00d4ff;
+    white-space: nowrap;
+    animation: typing 3s steps(20, end), blink-caret 1s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: #00d4ff; }
+}
+
+/* === 交互提示 - 简化版 === */
+.interaction-hints {
+    margin-top: 80px;
+    opacity: 0.4;
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    animation: hintPulse 4s ease-in-out infinite;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 4px;
+    backdrop-filter: blur(5px);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.interaction-hints div {
+    margin-bottom: 6px;
+}
+
+@keyframes hintPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+}
+
+/* === 底部状态栏 === */
 .footer-bar {
     position: fixed;
     bottom: 0;
     left: 0;
-    right: 0;
+    width: 100%;
     height: 60px;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
     border-top: 1px solid rgba(0, 212, 255, 0.3);
-    backdrop-filter: blur(20px);
-    z-index: 1000;
-    font-family: 'Courier New', monospace;
-}
-
-.footer-bar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, 
-        transparent 0%,
-        rgba(0, 212, 255, 0.8) 20%,
-        rgba(255, 0, 150, 0.8) 50%,
-        rgba(0, 255, 127, 0.8) 80%,
-        transparent 100%);
-    animation: footerScan 3s ease-in-out infinite;
-}
-
-@keyframes footerScan {
-    0%, 100% {
-        opacity: 0.3;
-        transform: scaleX(0.5);
-    }
-    50% {
-        opacity: 1;
-        transform: scaleX(1);
-    }
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
 }
 
 .footer-content {
-    height: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
+    width: 100%;
     font-size: 12px;
 }
 
@@ -794,7 +579,6 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #00d4ff;
 }
 
 .status-indicator {
@@ -802,41 +586,28 @@ body {
     height: 8px;
     background: #00ff7f;
     border-radius: 50%;
-    animation: statusBlink 2s infinite;
-    box-shadow: 0 0 8px #00ff7f;
+    animation: statusBlink 2s ease-in-out infinite;
 }
 
 @keyframes statusBlink {
-    0%, 50% {
-        opacity: 1;
-        transform: scale(1);
-    }
-    51%, 100% {
-        opacity: 0.3;
-        transform: scale(0.8);
-    }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
 }
 
 .footer-text {
-    font-weight: bold;
-    letter-spacing: 1px;
+    font-family: 'Courier New', monospace;
+    color: #00d4ff;
 }
 
 .footer-center {
     display: flex;
     align-items: center;
     gap: 15px;
-    color: #ffffff;
-    font-size: 11px;
-}
-
-.copyright {
-    color: #cccccc;
+    color: #888;
 }
 
 .separator {
     color: #00d4ff;
-    font-weight: bold;
 }
 
 .tagline {
@@ -844,101 +615,151 @@ body {
     font-style: italic;
 }
 
-.footer-right {
-    display: flex;
-    align-items: center;
-}
-
 .footer-right .social-links {
     display: flex;
-    gap: 10px;
+    gap: 15px;
 }
 
 .social-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: rgba(0, 212, 255, 0.1);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: 6px;
     color: #00d4ff;
     text-decoration: none;
     transition: all 0.3s ease;
-    font-size: 14px;
+    opacity: 0.7;
 }
 
 .social-link:hover {
-    background: rgba(0, 212, 255, 0.2);
-    border-color: #00d4ff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+    opacity: 1;
+    transform: scale(1.2);
+    text-shadow: 0 0 10px currentColor;
 }
 
-/* 响应式设计 */
+/* === 故障效果 === */
+.glitch-active {
+    animation: glitch 0.3s ease-in-out;
+}
+
+@keyframes glitch {
+    0%, 100% { 
+        filter: hue-rotate(0deg);
+        color: #fff;
+    }
+    25% { 
+        filter: hue-rotate(90deg);
+        color: #ff0096;
+    }
+    50% { 
+        filter: hue-rotate(180deg);
+        color: #00ff7f;
+    }
+    75% { 
+        filter: hue-rotate(270deg);
+        color: #00d4ff;
+    }
+}
+
+/* === 能量爆发效果 === */
+.energy-burst {
+    position: absolute;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.energy-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #00d4ff;
+    border-radius: 50%;
+    animation: energyExplosion 0.8s ease-out forwards;
+}
+
+@keyframes energyExplosion {
+    0% {
+        transform: scale(1) translate(0, 0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0) translate(var(--dx), var(--dy));
+        opacity: 0;
+    }
+}
+
+/* === 响应式设计 === */
 @media (max-width: 768px) {
-    .hero {
-        padding: 80px 0 100px 0;
+    .hero h1 {
+        font-size: 2.5rem;
+        letter-spacing: 2px;
+    }
+    
+    .hero p {
+        font-size: 1.2rem;
+    }
+    
+    .subtitle {
+        font-size: 0.9rem;
     }
     
     .header {
-        padding: 30px 0 15px 0;
+        top: 60px;
     }
     
-    .status-bar {
-        top: 15px;
-        right: 40px;
+    .hero {
+        margin-top: 80px;
+        padding: 0 10px;
+    }
+    
+    .logo-icon img {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .interaction-hints {
         font-size: 10px;
-        padding: 6px 12px;
+        margin-top: 40px;
     }
     
     .footer-content {
         flex-direction: column;
-        gap: 8px;
-        padding: 8px 15px;
+        gap: 5px;
         font-size: 10px;
     }
     
     .footer-bar {
         height: auto;
-        min-height: 50px;
-        padding: 8px 0;
+        padding: 10px;
     }
     
-    .footer-center {
-        flex-direction: column;
-        gap: 4px;
+    .hud-corner {
+        width: 20px;
+        height: 20px;
     }
     
-    .separator {
-        display: none;
-    }
-    
-    .footer-left,
-    .footer-right {
-        order: 2;
-    }
-    
-    .footer-center {
-        order: 1;
+    .status-bar {
+        font-size: 10px;
+        padding: 6px 12px;
     }
 }
 
-/* 滚动条样式 */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #1a1a1a;
-}
-
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #00d4ff, #0099cc);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #0099cc, #00d4ff);
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 2rem;
+    }
+    
+    .hero p {
+        font-size: 1rem;
+    }
+    
+    .grid-overlay {
+        background-size: 30px 30px;
+    }
+    
+    .particle {
+        width: 1px;
+        height: 1px;
+    }
+    
+    .neural-node {
+        width: 4px;
+        height: 4px;
+    }
 }
