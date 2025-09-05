@@ -1,0 +1,365 @@
+/* UNXAI 核心样式 - 现代化科技美学 */
+/* 专注于极简设计、优雅交互和流畅动画 */
+
+/* =========================
+   关键帧动画定义
+   ========================= */
+
+/* Logo悬浮动画 - 简洁版本 */
+@keyframes float {
+    0%, 100% { 
+        transform: translateY(0px); 
+    }
+    50% { 
+        transform: translateY(-6px); 
+    }
+}
+
+/* 球体光泽效果 */
+@keyframes sphere-glow {
+    0%, 100% { 
+        filter: brightness(1) contrast(1);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+    50% { 
+        filter: brightness(1.1) contrast(1.05);
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* 文字呼吸动画 */
+@keyframes breathe {
+    0%, 100% { 
+        transform: scale(1); 
+        opacity: 0.9; 
+    }
+    50% { 
+        transform: scale(1.01); 
+        opacity: 1; 
+    }
+}
+
+/* 旋转动画 */
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* 淡入动画 */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 状态指示器脉冲 */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+/* =========================
+   文字效果和渐变
+   ========================= */
+
+/* 主标题渐变 - 高对比度 */
+.text-gradient {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 50%, #cccccc 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* 品牌色渐变 */
+.accent-gradient {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 30%, #ffaaaa 70%, #ffffff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* =========================
+   现代化按钮系统
+   ========================= */
+
+/* GitHub按钮特效 */
+.modern-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.modern-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 107, 107, 0.2), transparent);
+    transition: all 0.6s ease;
+    z-index: 0;
+    left: -100%;
+}
+
+.modern-btn > * {
+    position: relative;
+    z-index: 10;
+}
+
+.modern-btn:hover::before {
+    left: 100%;
+}
+
+.modern-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+}
+
+.modern-btn:active {
+    transform: translateY(0) scale(0.98);
+    transition: all 0.1s ease;
+}
+
+/* =========================
+   简洁Logo效果系统
+   ========================= */
+
+/* Logo容器 */
+.logo-container {
+    position: relative;
+    cursor: pointer;
+    perspective: 1000px;
+    transition: all 0.3s ease;
+}
+
+/* Logo球体主体 - 地球效果 */
+.logo-sphere {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    animation: float 4s ease-in-out infinite;
+}
+
+/* 球体效果 */
+.sphere-effect {
+    animation: sphere-glow 6s ease-in-out infinite;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 悬停增强效果 */
+.logo-container:hover .logo-sphere {
+    transform: scale(1.05);
+    animation-duration: 2s;
+}
+
+.logo-container:hover .sphere-effect {
+    animation-duration: 3s;
+    filter: brightness(1.15) contrast(1.1);
+}
+
+/* 点击效果 */
+.logo-container:active .logo-sphere {
+    transform: scale(0.95);
+    transition: all 0.1s ease;
+}
+
+/* 焦点样式 */
+.logo-container:focus-visible {
+    outline: 2px solid #ff6b6b;
+    outline-offset: 4px;
+    border-radius: 50%;
+}
+
+/* =========================
+   交互提示系统
+   ========================= */
+
+/* 交互提示容器 */
+.interaction-hints {
+    pointer-events: none;
+}
+
+.interaction-hints > * {
+    pointer-events: auto;
+}
+
+/* 快捷键提示面板 */
+#keyboard-hints {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(-10px);
+    top: 5rem;
+}
+
+#keyboard-hints:hover {
+    opacity: 1 !important;
+    transform: translateY(0);
+}
+
+/* 移动端提示优化 */
+#mobile-hint {
+    backdrop-filter: blur(15px);
+    animation: fadeInUp 1s ease-out;
+}
+
+/* 状态指示器呼吸效果 */
+[role="status"] .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* =========================
+   响应式设计
+   ========================= */
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+    .logo-sphere {
+        animation-duration: 6s;
+    }
+    
+    #keyboard-hints {
+        display: none !important;
+    }
+    
+    #mobile-hint {
+        bottom: 5rem;
+        left: 1rem;
+        right: 1rem;
+        padding: 0.75rem;
+        z-index: 45;
+    }
+    
+    footer {
+        padding: 1rem;
+    }
+    
+    footer .flex {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    footer .text-xs {
+        font-size: 0.65rem;
+    }
+}
+
+/* 极小屏幕适配 */
+@media (max-width: 480px) {
+    #mobile-hint {
+        bottom: 6rem;
+        font-size: 0.8rem;
+        padding: 0.5rem;
+    }
+    
+    footer {
+        padding: 0.75rem;
+    }
+    
+    .modern-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .modern-btn .w-5 {
+        width: 1rem;
+        height: 1rem;
+    }
+}
+
+/* 大屏幕优化 */
+@media (min-width: 1920px) {
+    .logo-sphere {
+        width: 4.5rem;
+        height: 4.5rem;
+    }
+}
+
+/* 快捷键提示响应式 */
+@media (max-width: 1024px) {
+    #keyboard-hints {
+        top: 4.5rem;
+        right: 1rem;
+    }
+}
+
+@media (max-height: 800px) {
+    #keyboard-hints {
+        top: 4rem;
+    }
+}
+
+@media (max-height: 700px) {
+    #keyboard-hints {
+        top: 3.5rem;
+        font-size: 0.7rem;
+    }
+    
+    #keyboard-hints .p-4 {
+        padding: 0.75rem;
+    }
+    
+    nav {
+        padding: 1rem 1.5rem;
+    }
+    
+    .logo-sphere {
+        width: 3.5rem;
+        height: 3.5rem;
+    }
+}
+
+/* 特殊条件优化 */
+@media (max-height: 600px) {
+    #mobile-hint {
+        display: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .logo-sphere {
+        animation: none;
+    }
+}
+
+/* =========================
+   工具类和修饰符
+   ========================= */
+
+/* 无障碍支持 */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* 高性能变换 */
+.gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+}

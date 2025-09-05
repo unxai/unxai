@@ -2,84 +2,204 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNXAI - 未知无限 · AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>UNXAI - 未知无限</title>
     <meta name="description" content="UNXAI - 探索人工智能的无限可能，拥抱未知的科技未来">
-    <meta name="keywords" content="UNXAI,人工智能,AI,科技创新">
+    <meta name="keywords" content="UNXAI,人工智能,AI,科技创新,未知无限">
     <link rel="icon" type="image/png" href="./assets/logo.png">
     <link rel="shortcut icon" href="./assets/logo.png">
+    
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./assets/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'unx-primary': '#ffffff',
+                        'unx-secondary': '#888888',
+                        'unx-accent': '#ff6b6b',
+                        'unx-bg-primary': '#0a0a0a',
+                        'unx-bg-secondary': '#1a1a1a',
+                        'unx-bg-tertiary': '#2a2a2a'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                        'jetbrains': ['JetBrains Mono', 'monospace'],
+                        'space': ['Space Grotesk', 'sans-serif']
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 3s ease-in-out infinite',
+                        'breathe': 'breathe 4s ease-in-out infinite',
+                        'rotate': 'rotate 4s linear infinite',
+                        'pulse-ring': 'pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite',
+                        'energy-burst': 'energy-burst 1.5s ease-out',
+                        'orbit': 'orbit 8s linear infinite',
+                        'reverse-orbit': 'reverse-orbit 6s linear infinite'
+                    },
+                    backgroundImage: {
+                        'grid': 'linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px)',
+                        'text-gradient': 'linear-gradient(135deg, #ffffff 0%, #cccccc 100%)',
+                        'accent-gradient': 'linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 50%, #ffaaaa 100%)',
+                        'gradient-radial': 'radial-gradient(circle, var(--tw-gradient-stops))',
+                        'btn-shine': 'linear-gradient(90deg, transparent, rgba(255, 107, 107, 0.15), transparent)'
+                    },
+                    backgroundSize: {
+                        'grid': '50px 50px'
+                    },
+                    boxShadow: {
+                        'energy': '0 0 20px rgba(255, 107, 107, 0.4), 0 0 40px rgba(255, 107, 107, 0.2)',
+                        'energy-lg': '0 0 30px rgba(255, 107, 107, 0.6), 0 0 60px rgba(255, 107, 107, 0.3)',
+                        'glow-sm': '0 0 10px rgba(255, 107, 107, 0.3)',
+                        'glow-lg': '0 0 30px rgba(255, 107, 107, 0.4)'
+                    },
+                    backdropBlur: {
+                        'xs': '2px'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- 核心样式 -->
+    <link rel="stylesheet" href="./assets/styles.css">
 </head>
-<body>
-    <!-- 自定义光标 -->
-    <div class="custom-cursor"></div>
-
-    <!-- 动态背景 -->
-    <div class="background"></div>
-    <div class="grid-overlay"></div>
-    <div class="particles" id="particles"></div>
-    <div class="neural-network" id="neuralNetwork"></div>
-    <div class="data-stream" id="dataStream"></div>
-    <div class="digital-rain" id="digitalRain"></div>
-
-    <!-- HUD界面元素 -->
-    <div class="hud-elements">
-        <div class="hud-corner top-left"></div>
-        <div class="hud-corner top-right"></div>
-        <div class="hud-corner bottom-left"></div>
-        <div class="hud-corner bottom-right"></div>
-    </div>
-
-    <div class="container">
-        <!-- 头部 -->
-        <header class="header">
-            <div class="logo">
-                <div class="logo-icon">
-                    <div class="logo-shadow"></div>
-                    <img src="./assets/logo.png" alt="UNXAI Logo">
+<body class="font-inter bg-unx-bg-primary text-unx-primary overflow-x-hidden font-light leading-relaxed bg-grid bg-grid">
+    <!-- Three.js 3D背景容器 -->
+    <div id="threejs-container" class="fixed inset-0 w-full h-full -z-10 opacity-60"></div>
+    
+    <!-- 主要内容区域 -->
+    <main class="min-h-screen relative z-10" role="main">
+        <!-- 顶部导航栏 -->
+        <header class="fixed top-0 left-0 right-0 z-50 p-6" role="banner">
+            <nav class="flex justify-between items-center" role="navigation" aria-label="主导航">
+                <!-- UNXAI Logo -->
+                <div class="logo-container group" id="logo-container" role="button" tabindex="0" aria-label="UNXAI Logo，点击触发特效">
+                    <div class="logo-sphere w-16 h-16 relative" id="logo-sphere">
+                        <!-- 地球效果背景 -->
+                        <div class="absolute inset-0 bg-gradient-radial from-unx-accent/20 to-transparent rounded-full animate-pulse"></div>
+                        
+                        <!-- Logo主体容器 -->
+                        <div class="relative w-full h-full bg-white/10 backdrop-blur-lg border border-white/20 rounded-full shadow-energy overflow-hidden sphere-effect">
+                            <!-- Logo图片 -->
+                            <div class="relative w-full h-full flex items-center justify-center z-10">
+                                <img src="./assets/logo.png" alt="UNXAI Logo" class="w-16 h-16 opacity-95 filter drop-shadow-lg">
+                            </div>
+                            
+                            <!-- 地球光晕效果 -->
+                            <div class="absolute top-1 left-1/4 w-1/2 h-1/3 bg-white/20 rounded-full blur-sm"></div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+                
+                <!-- 系统状态指示器 -->
+                <div class="hidden md:flex items-center gap-4">
+                    <div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl px-3 py-2 text-xs font-jetbrains" role="status" aria-live="polite">
+                        <span class="inline-block w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
+                        <span class="sr-only">系统状态：</span>SYSTEM ACTIVE
+                    </div>
+                </div>
+            </nav>
         </header>
 
-        <!-- 主要内容 -->
-        <main class="hero">
-            <h1 class="typing-enhanced">UNXAI</h1>
-            <p class="typing-enhanced">未知无限 · 探索AI</p>
-            <div class="subtitle typing-enhanced">Unknown Unlimited · Exploring Artificial Intelligence</div>
-            
-            <!-- 简化交互提示 -->
-            <div class="interaction-hints">
-                <div>🎮 点击屏幕任意位置触发爆炸效果</div>
-                <div>⌨️ 快捷键: F-全屏 | G-故障 | 空格-能量爆发 | ESC-主题切换</div>
+        <!-- 首页内容区域 -->
+        <section class="flex items-center justify-center min-h-screen px-6" role="main" aria-labelledby="main-title">
+            <div class="text-center max-w-4xl mx-auto">
+                <!-- 品牌标识区域 -->
+                <div class="mb-16">
+                    <h1 class="text-6xl md:text-8xl font-thin mb-6 tracking-tight text-gradient animate-breathe" id="main-title">
+                        UNXAI
+                    </h1>
+                    <!-- 装饰分割线 -->
+                    <div class="w-24 h-0.5 bg-gradient-to-r from-transparent via-unx-accent to-transparent mx-auto mb-8 animate-glow" aria-hidden="true"></div>
+                    <!-- 中文品牌理念 -->
+                    <p class="text-2xl md:text-3xl font-light text-unx-secondary mb-4" id="subtitle">
+                        未知无限
+                    </p>
+                    <!-- 英文副标题 -->
+                    <p class="text-sm md:text-base font-jetbrains text-unx-secondary/70 tracking-widest" id="subtitle-en">
+                        Unknown · Unlimited
+                    </p>
+                </div>
+                
+                <!-- 品牌理念展示 -->
+                <div class="mb-16">
+                    <article class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8 md:p-12 hover:transform hover:-translate-y-1 transition-all duration-300 animate-breathe">
+                        <h2 class="text-2xl md:text-3xl font-light mb-6 text-gradient">
+                            AI驱动的未知探索
+                        </h2>
+                        <p class="text-unx-secondary leading-relaxed max-w-lg mx-auto text-sm md:text-base">
+                            在人工智能的浩瀚边界中，探寻未知的奥秘与无限的可能
+                        </p>
+                    </article>
+                </div>
             </div>
-        </main>
-    </div>
+        </section>
 
-    <!-- 底部状态栏 -->
-    <footer class="footer-bar">
-        <div class="footer-content">
-            <div class="footer-left">
-                <span class="status-indicator"></span>
-                <span class="footer-text">UNXAI SYSTEM</span>
+        <!-- 页面底部 -->
+        <footer class="fixed bottom-0 left-0 right-0 z-50 p-6 pointer-events-none" role="contentinfo">
+            <div class="flex justify-center items-center gap-8">
+                <!-- GitHub 项目链接 -->
+                <a href="https://github.com/unxai" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="modern-btn hover:border-unx-accent hover:shadow-unx-accent/20 hover:shadow-lg hover:-translate-y-px bg-transparent border border-unx-accent/30 rounded-full px-4 py-2 text-unx-primary font-light tracking-wide transition-all duration-300 pointer-events-auto"
+                   aria-label="访问 UNXAI GitHub 项目页面">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-lg font-light">GitHub</span>
+                    </div>
+                </a>
+                
+                <!-- 版权信息 -->
+                <div class="text-xs text-unx-secondary font-jetbrains pointer-events-auto" role="contentinfo">
+                    © 2025 UNXAI · 探索无限，拥抱未知
+                </div>
             </div>
-            <div class="footer-center">
-                <span class="copyright">© <span id="current-year">2025</span> UNXAI</span>
-                <span class="separator">|</span>
-                <span class="tagline">探索无限，拥抱未知</span>
-            </div>
-            <div class="footer-right">
-                <div class="social-links">
-                    <a href="https://github.com/unxai" target="_blank" class="social-link" title="访问 UNXAI GitHub 组织">
-                        <span>🔗 GitHub</span>
-                    </a>
+        </footer>
+    </main>
+    
+    <!-- 交互提示与帮助 -->
+    <div class="interaction-hints">
+        <!-- 移动端操作提示 -->
+        <div class="md:hidden bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl fixed bottom-20 left-4 right-4 p-3 text-center text-sm text-unx-secondary z-40" id="mobile-hint" role="tooltip">
+            <div class="mb-1 text-xs font-medium">移动端优化模式</div>
+            <div class="text-xs opacity-70 leading-tight">点击屏幕体验特效 · 双击触发能量爆发</div>
+        </div>
+        
+        <!-- 桌面端快捷键提示 -->
+        <div class="hidden md:block fixed top-20 right-6 z-40 opacity-0 transition-opacity duration-300" id="keyboard-hints">
+            <div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4 text-xs font-jetbrains text-unx-secondary">
+                <div class="mb-2 text-center text-white font-medium">快捷键</div>
+                <div class="space-y-1">
+                    <div><span class="bg-white/10 px-2 py-1 rounded">ESC</span> 切换主题</div>
+                    <div><span class="bg-white/10 px-2 py-1 rounded">空格</span> 能量爆发</div>
+                    <div><span class="bg-white/10 px-2 py-1 rounded">F</span> 全屏模式</div>
+                    <div><span class="bg-white/10 px-2 py-1 rounded">H</span> 显示/隐藏帮助</div>
                 </div>
             </div>
         </div>
-    </footer>
-
+    </div>
+    
+    <!-- 加载新的JavaScript -->
     <script src="./assets/script.js"></script>
 </body>
 </html>
