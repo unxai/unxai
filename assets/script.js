@@ -21,6 +21,22 @@ class UNXAIExperience {
         this.particleCount = this.isMobile ? 300 : 800;
         this.performanceLevel = this.detectPerformance();
         
+        // 新增创意交互属性
+        this.audioContext = null;
+        this.analyser = null;
+        this.mouseTrail = [];
+        this.gestureBuffer = [];
+        this.lastMouseTime = 0;
+        this.energyLevel = 0;
+        this.isTimeWarpActive = false;
+        this.scanLines = [];
+        this.particleConnections = [];
+        this.virtualKeyboard = null;
+        this.voiceAmplitude = 0;
+        this.mouseVelocity = { x: 0, y: 0 };
+        this.lastMousePos = { x: 0, y: 0 };
+        this.gestureRecognitionEnabled = true;
+        
         // 初始化系统
         this.init();
     }
@@ -87,6 +103,7 @@ class UNXAIExperience {
             () => this.initInteractions(),
             () => this.initKeyboardControls(),
             () => this.initHelpSystem(),
+            () => this.initCreativeInteractions(), // 新增创意交互
             () => this.startRenderLoop()
         ];
         
@@ -161,8 +178,20 @@ class UNXAIExperience {
         
         // 鼠标跟踪用于3D交互
         document.addEventListener('mousemove', (e) => {
+            const prevMouse = { x: this.mouse.x, y: this.mouse.y };
             this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
             this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            
+            // 计算鼠标速度
+            this.mouseVelocity.x = this.mouse.x - prevMouse.x;
+            this.mouseVelocity.y = this.mouse.y - prevMouse.y;
+            
+            // 记录鼠标轨迹
+            this.recordMouseTrail(e.clientX, e.clientY);
+            
+            // 更新能量等级
+            const velocity = Math.sqrt(this.mouseVelocity.x ** 2 + this.mouseVelocity.y ** 2);
+            this.energyLevel = Math.min(this.energyLevel + velocity * 0.5, 1);
         });
         
         console.log('✅ 3D 环境初始化完成');
@@ -331,7 +360,769 @@ class UNXAIExperience {
         }
     }
     
-    // === 交互系统 ===
+    // === 创意交互系统 ===
+    initCreativeInteractions() {
+        console.log('🎆 初始化创意交互系统...');
+        
+        // 初始化各种创意交互模块
+        this.initAudioVisualization();
+        this.initGestureRecognition();
+        this.initSmartParticleSystem();
+        this.initScanLineEffect();
+        this.initEnergyConnections();
+        this.initTimeWarpEffect();
+        this.initVirtualKeyboard();
+        this.initVoiceInteraction();
+        
+        console.log('✅ 创意交互系统初始化完成');
+    }
+    
+    // 音频可视化初始化
+    async initAudioVisualization() {
+        try {
+            // 创建虚拟音频上下文（不需要真实音频输入）
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.analyser = this.audioContext.createAnalyser();
+            this.analyser.fftSize = 256;
+            
+            // 创建虚拟音频数据
+            this.frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
+            
+            // 模拟音频数据更新
+            this.startAudioSimulation();
+            
+        } catch (error) {
+            console.warn('音频初始化警告:', error);
+        }
+    }
+    
+    // 模拟音频数据
+    startAudioSimulation() {
+        const updateAudioData = () => {
+            // 根据鼠标移动和能量等级模拟音频
+            const baseLevel = this.energyLevel * 100;
+            const velocity = Math.sqrt(this.mouseVelocity.x ** 2 + this.mouseVelocity.y ** 2);
+            
+            for (let i = 0; i < this.frequencyData.length; i++) {
+                const frequency = (i / this.frequencyData.length) * 100;
+                const noise = Math.random() * 20;
+                const mouseInfluence = velocity * 50 * Math.sin(Date.now() * 0.01 + i * 0.1);
+                
+                this.frequencyData[i] = Math.max(0, Math.min(255, 
+                    baseLevel + noise + mouseInfluence + Math.sin(Date.now() * 0.005 + i) * 10
+                ));
+            }
+            
+            // 计算平均音量
+            const average = this.frequencyData.reduce((a, b) => a + b, 0) / this.frequencyData.length;
+            this.voiceAmplitude = average / 255;
+            
+            requestAnimationFrame(updateAudioData);
+        };
+        updateAudioData();
+    }
+    
+    // 手势识别初始化
+    initGestureRecognition() {
+        this.gesturePatterns = {
+            circle: {
+                name: '圈形',
+                action: () => this.triggerCircleGesture(),
+                pattern: this.detectCirclePattern.bind(this)
+            },
+            lightning: {
+                name: '闪电',
+                action: () => this.triggerLightningGesture(),
+                pattern: this.detectLightningPattern.bind(this)
+            },
+            wave: {
+                name: '波浪',
+                action: () => this.triggerWaveGesture(),
+                pattern: this.detectWavePattern.bind(this)
+            }
+        };
+        
+        // 手势识别定时器
+        setInterval(() => {
+            if (this.gestureRecognitionEnabled) {
+                this.analyzeGestures();
+            }
+        }, 500);
+    }
+    
+    // 记录鼠标轨迹
+    recordMouseTrail(x, y) {
+        const now = Date.now();
+        this.mouseTrail.push({ x, y, time: now });
+        
+        // 只保留最近5秒的轨迹
+        this.mouseTrail = this.mouseTrail.filter(point => now - point.time < 5000);
+        
+        // 记录手势缓冲
+        if (this.gestureRecognitionEnabled) {
+            this.gestureBuffer.push({ x, y, time: now });
+            if (this.gestureBuffer.length > 20) {
+                this.gestureBuffer.shift();
+            }
+        }
+    }
+    
+    // 手势分析
+    analyzeGestures() {
+        if (this.gestureBuffer.length < 5) return;
+        
+        for (const [key, gesture] of Object.entries(this.gesturePatterns)) {
+            if (gesture.pattern(this.gestureBuffer)) {
+                gesture.action();
+                this.gestureBuffer = []; // 清空缓冲
+                this.showTemporaryMessage(`手势识别: ${gesture.name}`, 1500);
+                break;
+            }
+        }
+    }
+    
+    // 圈形手势检测
+    detectCirclePattern(buffer) {
+        if (buffer.length < 8) return false;
+        
+        const centerX = buffer.reduce((sum, p) => sum + p.x, 0) / buffer.length;
+        const centerY = buffer.reduce((sum, p) => sum + p.y, 0) / buffer.length;
+        
+        let angleSum = 0;
+        for (let i = 1; i < buffer.length; i++) {
+            const angle1 = Math.atan2(buffer[i-1].y - centerY, buffer[i-1].x - centerX);
+            const angle2 = Math.atan2(buffer[i].y - centerY, buffer[i].x - centerX);
+            let angleDiff = angle2 - angle1;
+            
+            if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+            if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+            
+            angleSum += angleDiff;
+        }
+        
+        return Math.abs(angleSum) > Math.PI * 1.5; // 至少转了270度
+    }
+    
+    // 闪电手势检测（之字形）
+    detectLightningPattern(buffer) {
+        if (buffer.length < 6) return false;
+        
+        let directionChanges = 0;
+        let lastDirection = null;
+        
+        for (let i = 1; i < buffer.length; i++) {
+            const deltaX = buffer[i].x - buffer[i-1].x;
+            const deltaY = buffer[i].y - buffer[i-1].y;
+            const currentDirection = Math.sign(deltaX) + Math.sign(deltaY) * 2;
+            
+            if (lastDirection !== null && currentDirection !== lastDirection) {
+                directionChanges++;
+            }
+            lastDirection = currentDirection;
+        }
+        
+        return directionChanges >= 3; // 至少匃3次方向变化
+    }
+    
+    // 波浪手势检测（水平波浪形）
+    detectWavePattern(buffer) {
+        if (buffer.length < 8) return false;
+        
+        let peaks = 0;
+        let valleys = 0;
+        
+        for (let i = 1; i < buffer.length - 1; i++) {
+            const prev = buffer[i-1].y;
+            const curr = buffer[i].y;
+            const next = buffer[i+1].y;
+            
+            if (curr > prev && curr > next) peaks++;
+            if (curr < prev && curr < next) valleys++;
+        }
+        
+        return peaks >= 2 && valleys >= 2;
+    }
+    
+    // 手势动作实现
+    triggerCircleGesture() {
+        // 圆形能量波效果
+        this.createRippleEffect(window.innerWidth / 2, window.innerHeight / 2, 'large');
+        
+        // 粒子系统旋转效果
+        if (this.particles) {
+            gsap.to(this.particles.rotation, {
+                y: this.particles.rotation.y + Math.PI * 2,
+                duration: 2,
+                ease: "power2.out"
+            });
+        }
+        
+        // 主题颜色旋转
+        this.cycleTheme();
+    }
+    
+    triggerLightningGesture() {
+        // 闪电效果
+        this.createLightningEffect();
+        
+        // 时间略微扰曲
+        this.temporaryTimeWarp(1000);
+    }
+    
+    triggerWaveGesture() {
+        // 波浪效果
+        this.createWaveEffect();
+        
+        // 粒子波动
+        if (this.particles) {
+            gsap.to(this.particles.material.uniforms.time, {
+                value: this.particles.material.uniforms.time.value + 50,
+                duration: 3,
+                ease: "sine.inOut"
+            });
+        }
+    }
+    
+    // 智能粒子系统
+    initSmartParticleSystem() {
+        this.particleTargets = [];
+        this.particleFollowers = [];
+        
+        // 创建跟随粒子
+        this.createFollowerParticles();
+        
+        // 启动粒子更新循环
+        this.updateSmartParticles();
+    }
+    
+    createFollowerParticles() {
+        const followerCount = this.isMobile ? 3 : 8;
+        
+        for (let i = 0; i < followerCount; i++) {
+            this.particleFollowers.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                targetX: 0,
+                targetY: 0,
+                speed: 0.02 + Math.random() * 0.03,
+                element: this.createFollowerElement(i)
+            });
+        }
+    }
+    
+    createFollowerElement(index) {
+        const element = document.createElement('div');
+        element.style.cssText = `
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #ff6b6b, transparent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+            transition: opacity 0.3s ease;
+            opacity: 0.6;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.8);
+        `;
+        document.body.appendChild(element);
+        return element;
+    }
+    
+    updateSmartParticles() {
+        const update = () => {
+            const mouseX = (this.mouse.x + 1) * window.innerWidth / 2;
+            const mouseY = (-this.mouse.y + 1) * window.innerHeight / 2;
+            
+            this.particleFollowers.forEach((particle, index) => {
+                // 计算目标位置（鼠标周围的圆形轨道）
+                const angle = (Date.now() * 0.001 + index * (Math.PI * 2 / this.particleFollowers.length)) % (Math.PI * 2);
+                const radius = 50 + this.voiceAmplitude * 30;
+                
+                particle.targetX = mouseX + Math.cos(angle) * radius;
+                particle.targetY = mouseY + Math.sin(angle) * radius;
+                
+                // 平滑移动
+                particle.x += (particle.targetX - particle.x) * particle.speed;
+                particle.y += (particle.targetY - particle.y) * particle.speed;
+                
+                // 更新元素位置
+                particle.element.style.left = particle.x + 'px';
+                particle.element.style.top = particle.y + 'px';
+                
+                // 根据速度调整透明度
+                const velocity = Math.sqrt(
+                    Math.pow(particle.targetX - particle.x, 2) + 
+                    Math.pow(particle.targetY - particle.y, 2)
+                );
+                particle.element.style.opacity = Math.min(0.8, 0.3 + velocity * 0.01);
+            });
+            
+            requestAnimationFrame(update);
+        };
+        update();
+    }
+    
+    // 扫描线效果
+    initScanLineEffect() {
+        this.createScanLines();
+        this.animateScanLines();
+    }
+    
+    createScanLines() {
+        const scanLineCount = this.isMobile ? 2 : 4;
+        
+        for (let i = 0; i < scanLineCount; i++) {
+            const scanLine = document.createElement('div');
+            scanLine.style.cssText = `
+                position: fixed;
+                left: 0;
+                width: 100%;
+                height: 2px;
+                background: linear-gradient(90deg, 
+                    transparent 0%, 
+                    rgba(255, 107, 107, 0.8) 50%, 
+                    transparent 100%);
+                pointer-events: none;
+                z-index: 50;
+                opacity: 0;
+                box-shadow: 0 0 20px rgba(255, 107, 107, 0.6);
+            `;
+            
+            this.scanLines.push({
+                element: scanLine,
+                direction: Math.random() > 0.5 ? 1 : -1,
+                speed: 0.5 + Math.random() * 1,
+                delay: i * 2000
+            });
+            
+            document.body.appendChild(scanLine);
+        }
+    }
+    
+    animateScanLines() {
+        this.scanLines.forEach((scanLine, index) => {
+            const animate = () => {
+                const duration = 3000 + Math.random() * 2000;
+                const startY = scanLine.direction > 0 ? -10 : window.innerHeight + 10;
+                const endY = scanLine.direction > 0 ? window.innerHeight + 10 : -10;
+                
+                gsap.set(scanLine.element, { 
+                    top: startY + 'px',
+                    opacity: 0 
+                });
+                
+                gsap.timeline()
+                    .to(scanLine.element, {
+                        opacity: 0.6,
+                        duration: 0.5,
+                        ease: "power2.out"
+                    })
+                    .to(scanLine.element, {
+                        top: endY + 'px',
+                        duration: duration / 1000,
+                        ease: "none"
+                    }, 0)
+                    .to(scanLine.element, {
+                        opacity: 0,
+                        duration: 0.5,
+                        ease: "power2.in"
+                    }, "-=0.5")
+                    .call(() => {
+                        // 延迟后再次启动
+                        setTimeout(animate, 5000 + Math.random() * 10000);
+                    });
+            };
+            
+            // 初始延迟
+            setTimeout(animate, scanLine.delay);
+        });
+    }
+    
+    // 能量连线系统
+    initEnergyConnections() {
+        this.connectionCanvas = document.createElement('canvas');
+        this.connectionCanvas.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 45;
+        `;
+        
+        this.connectionCtx = this.connectionCanvas.getContext('2d');
+        this.resizeConnectionCanvas();
+        
+        document.body.appendChild(this.connectionCanvas);
+        
+        // 启动连线绘制
+        this.drawConnections();
+        
+        // 监听窗口大小变化
+        window.addEventListener('resize', () => this.resizeConnectionCanvas());
+    }
+    
+    resizeConnectionCanvas() {
+        this.connectionCanvas.width = window.innerWidth;
+        this.connectionCanvas.height = window.innerHeight;
+    }
+    
+    drawConnections() {
+        const draw = () => {
+            this.connectionCtx.clearRect(0, 0, this.connectionCanvas.width, this.connectionCanvas.height);
+            
+            const mouseX = (this.mouse.x + 1) * window.innerWidth / 2;
+            const mouseY = (-this.mouse.y + 1) * window.innerHeight / 2;
+            
+            // 绘制鼠标到随机粒子的连线
+            this.particleFollowers.forEach((particle, index) => {
+                const distance = Math.sqrt(
+                    Math.pow(mouseX - particle.x, 2) + 
+                    Math.pow(mouseY - particle.y, 2)
+                );
+                
+                if (distance < 200) { // 只在近距离内连接
+                    const opacity = (1 - distance / 200) * 0.3 * this.energyLevel;
+                    
+                    this.connectionCtx.beginPath();
+                    this.connectionCtx.strokeStyle = `rgba(255, 107, 107, ${opacity})`;
+                    this.connectionCtx.lineWidth = 1;
+                    this.connectionCtx.moveTo(mouseX, mouseY);
+                    this.connectionCtx.lineTo(particle.x, particle.y);
+                    this.connectionCtx.stroke();
+                    
+                    // 添加脑电波效果
+                    if (Math.random() < 0.1) {
+                        this.drawLightningBolt(mouseX, mouseY, particle.x, particle.y, opacity);
+                    }
+                }
+            });
+            
+            // 能量等级自然衰减
+            this.energyLevel *= 0.995;
+            
+            requestAnimationFrame(draw);
+        };
+        draw();
+    }
+    
+    drawLightningBolt(startX, startY, endX, endY, opacity) {
+        const segments = 8;
+        const roughness = 0.3;
+        
+        this.connectionCtx.beginPath();
+        this.connectionCtx.strokeStyle = `rgba(255, 255, 255, ${opacity * 2})`;
+        this.connectionCtx.lineWidth = 2;
+        this.connectionCtx.moveTo(startX, startY);
+        
+        for (let i = 1; i < segments; i++) {
+            const t = i / segments;
+            const x = startX + (endX - startX) * t;
+            const y = startY + (endY - startY) * t;
+            
+            // 添加随机偏移
+            const offsetX = (Math.random() - 0.5) * roughness * 50;
+            const offsetY = (Math.random() - 0.5) * roughness * 50;
+            
+            this.connectionCtx.lineTo(x + offsetX, y + offsetY);
+        }
+        
+        this.connectionCtx.lineTo(endX, endY);
+        this.connectionCtx.stroke();
+    }
+    
+    // 时间扰曲效果
+    initTimeWarpEffect() {
+        // 监听按键事件
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Shift' && !this.isTimeWarpActive) {
+                this.activateTimeWarp();
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'Shift' && this.isTimeWarpActive) {
+                this.deactivateTimeWarp();
+            }
+        });
+    }
+    
+    activateTimeWarp() {
+        this.isTimeWarpActive = true;
+        
+        // 减慢动画
+        gsap.globalTimeline.timeScale(0.3);
+        
+        // 视觉效果
+        gsap.to(document.body, {
+            filter: `${this.getThemeFilter()} contrast(1.2) saturate(1.3) hue-rotate(10deg)`,
+            duration: 0.5,
+            ease: "power2.out"
+        });
+        
+        // 显示时间扰曲指示
+        this.showTemporaryMessage('时间扰曲激活', 500);
+        
+        console.log('⏱️ 时间扰曲激活');
+    }
+    
+    deactivateTimeWarp() {
+        this.isTimeWarpActive = false;
+        
+        // 恢复正常速度
+        gsap.globalTimeline.timeScale(1);
+        
+        // 恢复视觉效果
+        gsap.to(document.body, {
+            filter: this.getThemeFilter(),
+            duration: 0.8,
+            ease: "power2.inOut"
+        });
+        
+        console.log('⏱️ 时间扰曲停止');
+    }
+    
+    temporaryTimeWarp(duration) {
+        if (this.isTimeWarpActive) return;
+        
+        this.activateTimeWarp();
+        setTimeout(() => {
+            this.deactivateTimeWarp();
+        }, duration);
+    }
+    
+    // 虚拟键盘系统
+    initVirtualKeyboard() {
+        if (this.isMobile) {
+            this.createVirtualKeyboard();
+        }
+    }
+    
+    createVirtualKeyboard() {
+        this.virtualKeyboard = document.createElement('div');
+        this.virtualKeyboard.style.cssText = `
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            font-family: 'JetBrains Mono', monospace;
+        `;
+        
+        const keys = [
+            { label: '主题', key: 'ESC', action: () => this.toggleTheme() },
+            { label: '能量', key: 'SPC', action: () => this.triggerEnergyBurst() },
+            { label: '帮助', key: 'H', action: () => this.toggleHelp() },
+            { label: '重置', key: 'R', action: () => this.resetExperience() }
+        ];
+        
+        keys.forEach(keyInfo => {
+            const keyButton = document.createElement('button');
+            keyButton.style.cssText = `
+                display: block;
+                width: 100%;
+                margin: 5px 0;
+                padding: 8px 12px;
+                background: rgba(255, 107, 107, 0.1);
+                border: 1px solid rgba(255, 107, 107, 0.3);
+                border-radius: 8px;
+                color: #ff6b6b;
+                font-size: 12px;
+                font-family: inherit;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            `;
+            
+            keyButton.innerHTML = `
+                <div style="font-weight: bold;">${keyInfo.label}</div>
+                <div style="font-size: 10px; opacity: 0.7;">${keyInfo.key}</div>
+            `;
+            
+            keyButton.addEventListener('click', keyInfo.action);
+            
+            keyButton.addEventListener('mouseenter', () => {
+                keyButton.style.background = 'rgba(255, 107, 107, 0.2)';
+                keyButton.style.transform = 'scale(1.05)';
+            });
+            
+            keyButton.addEventListener('mouseleave', () => {
+                keyButton.style.background = 'rgba(255, 107, 107, 0.1)';
+                keyButton.style.transform = 'scale(1)';
+            });
+            
+            this.virtualKeyboard.appendChild(keyButton);
+        });
+        
+        document.body.appendChild(this.virtualKeyboard);
+        
+        // 显示虚拟键盘
+        setTimeout(() => {
+            this.virtualKeyboard.style.opacity = '0.8';
+            this.virtualKeyboard.style.transform = 'translateY(0)';
+        }, 2000);
+        
+        // 5秒后自动隐藏
+        setTimeout(() => {
+            this.virtualKeyboard.style.opacity = '0';
+            this.virtualKeyboard.style.transform = 'translateY(20px)';
+        }, 7000);
+    }
+    
+    // 语音交互初始化
+    async initVoiceInteraction() {
+        try {
+            // 请求麦克风权限（可选）
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                this.setupVoiceAnalysis(stream);
+            }
+        } catch (error) {
+            console.log('语音交互不可用:', error.message);
+            // 使用模拟数据
+            this.useSimulatedVoice();
+        }
+    }
+    
+    setupVoiceAnalysis(stream) {
+        if (!this.audioContext) return;
+        
+        const source = this.audioContext.createMediaStreamSource(stream);
+        source.connect(this.analyser);
+        
+        const updateVoiceData = () => {
+            this.analyser.getByteFrequencyData(this.frequencyData);
+            
+            // 计算平均音量
+            const average = this.frequencyData.reduce((a, b) => a + b, 0) / this.frequencyData.length;
+            this.voiceAmplitude = average / 255;
+            
+            // 根据音量调整粒子效果
+            if (this.particles && this.voiceAmplitude > 0.1) {
+                const scale = 1 + this.voiceAmplitude * 0.2;
+                gsap.to(this.particles.scale, {
+                    x: scale,
+                    y: scale,
+                    z: scale,
+                    duration: 0.1,
+                    ease: "power2.out"
+                });
+            }
+            
+            requestAnimationFrame(updateVoiceData);
+        };
+        
+        updateVoiceData();
+        console.log('🎤 语音交互已启用');
+    }
+    
+    useSimulatedVoice() {
+        // 使用模拟音量数据
+        const updateSimulatedVoice = () => {
+            // 模拟随机音量变化
+            this.voiceAmplitude = Math.max(0, this.voiceAmplitude + (Math.random() - 0.5) * 0.05);
+            this.voiceAmplitude = Math.min(0.3, this.voiceAmplitude);
+            
+            requestAnimationFrame(updateSimulatedVoice);
+        };
+        updateSimulatedVoice();
+    }
+    
+    // 额外的创意效果
+    createLightningEffect() {
+        // 闪电效果实现
+        const lightning = document.createElement('div');
+        lightning.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0;
+        `;
+        
+        document.body.appendChild(lightning);
+        
+        gsap.timeline()
+            .to(lightning, {
+                opacity: 0.8,
+                duration: 0.05,
+                ease: "power2.out"
+            })
+            .to(lightning, {
+                opacity: 0,
+                duration: 0.3,
+                ease: "power2.in"
+            })
+            .call(() => lightning.remove());
+        
+        // 声音效果（可选）
+        this.playThunderSound();
+    }
+    
+    createWaveEffect() {
+        // 波浪效果实现
+        const waveCount = 5;
+        
+        for (let i = 0; i < waveCount; i++) {
+            setTimeout(() => {
+                this.createRippleEffect(
+                    Math.random() * window.innerWidth,
+                    Math.random() * window.innerHeight,
+                    'normal'
+                );
+            }, i * 200);
+        }
+    }
+    
+    cycleTheme() {
+        // 快速切换主题
+        const themes = ['default', 'blue', 'green', 'purple', 'orange'];
+        const currentIndex = themes.indexOf(this.currentTheme);
+        
+        for (let i = 0; i < themes.length; i++) {
+            setTimeout(() => {
+                const nextIndex = (currentIndex + i + 1) % themes.length;
+                this.currentTheme = themes[nextIndex];
+                
+                gsap.to(document.body, {
+                    filter: this.getThemeFilter(),
+                    duration: 0.3,
+                    ease: "power2.inOut"
+                });
+            }, i * 300);
+        }
+    }
+    
+    playThunderSound() {
+        // 使用Web Audio API创建简单的声音效果
+        if (this.audioContext) {
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(50, this.audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(25, this.audioContext.currentTime + 0.3);
+            
+            gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+            
+            oscillator.start(this.audioContext.currentTime);
+            oscillator.stop(this.audioContext.currentTime + 0.3);
+        }
+    }
     initInteractions() {
         console.log('🎮 初始化交互系统...');
         
@@ -572,6 +1363,26 @@ class UNXAIExperience {
                     e.preventDefault();
                     this.resetExperience();
                     break;
+                case 'g':
+                    e.preventDefault();
+                    this.toggleGestureRecognition();
+                    break;
+                case 'v':
+                    e.preventDefault();
+                    this.toggleVirtualKeyboard();
+                    break;
+                case 'l':
+                    e.preventDefault();
+                    this.triggerLightningGesture();
+                    break;
+                case 'w':
+                    e.preventDefault();
+                    this.triggerWaveGesture();
+                    break;
+                case 'c':
+                    e.preventDefault();
+                    this.triggerCircleGesture();
+                    break;
                 default:
                     break;
             }
@@ -581,6 +1392,28 @@ class UNXAIExperience {
         this.addKeyboardNavigation();
         
         console.log('✅ 键盘控制初始化完成');
+    }
+    
+    // 新增的键盘功能
+    toggleGestureRecognition() {
+        this.gestureRecognitionEnabled = !this.gestureRecognitionEnabled;
+        this.showTemporaryMessage(
+            `手势识别: ${this.gestureRecognitionEnabled ? '开启' : '关闭'}`,
+            1500
+        );
+    }
+    
+    toggleVirtualKeyboard() {
+        if (!this.virtualKeyboard) return;
+        
+        const isVisible = this.virtualKeyboard.style.opacity !== '0';
+        
+        gsap.to(this.virtualKeyboard, {
+            opacity: isVisible ? 0 : 0.8,
+            y: isVisible ? 20 : 0,
+            duration: 0.3,
+            ease: "power2.out"
+        });
     }
     
     // 添加帮助系统
