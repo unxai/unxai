@@ -612,18 +612,8 @@ class UNXAIExperience {
     
     createFollowerElement(index) {
         const element = document.createElement('div');
-        element.style.cssText = `
-            position: fixed;
-            width: 4px;
-            height: 4px;
-            background: radial-gradient(circle, #ff6b6b, transparent);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 100;
-            transition: opacity 0.3s ease;
-            opacity: 0.6;
-            box-shadow: 0 0 10px rgba(255, 107, 107, 0.8);
-        `;
+        element.className = 'fixed w-1 h-1 bg-gradient-radial from-unx-accent to-transparent rounded-full pointer-events-none z-[100] transition-opacity duration-300 opacity-60';
+        element.style.boxShadow = '0 0 10px rgba(255, 107, 107, 0.8)';
         document.body.appendChild(element);
         return element;
     }
@@ -673,20 +663,9 @@ class UNXAIExperience {
         
         for (let i = 0; i < scanLineCount; i++) {
             const scanLine = document.createElement('div');
-            scanLine.style.cssText = `
-                position: fixed;
-                left: 0;
-                width: 100%;
-                height: 2px;
-                background: linear-gradient(90deg, 
-                    transparent 0%, 
-                    rgba(255, 107, 107, 0.8) 50%, 
-                    transparent 100%);
-                pointer-events: none;
-                z-index: 50;
-                opacity: 0;
-                box-shadow: 0 0 20px rgba(255, 107, 107, 0.6);
-            `;
+            scanLine.className = 'fixed left-0 w-full h-0.5 pointer-events-none z-50 opacity-0';
+            scanLine.style.background = 'linear-gradient(90deg, transparent 0%, rgba(255, 107, 107, 0.8) 50%, transparent 100%)';
+            scanLine.style.boxShadow = '0 0 20px rgba(255, 107, 107, 0.6)';
             
             this.scanLines.push({
                 element: scanLine,
@@ -741,15 +720,7 @@ class UNXAIExperience {
     // 能量连线系统
     initEnergyConnections() {
         this.connectionCanvas = document.createElement('canvas');
-        this.connectionCanvas.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 45;
-        `;
+        this.connectionCanvas.className = 'fixed top-0 left-0 w-full h-full pointer-events-none z-45 connection-canvas';
         
         this.connectionCtx = this.connectionCanvas.getContext('2d');
         this.resizeConnectionCanvas();
@@ -901,21 +872,7 @@ class UNXAIExperience {
     
     createVirtualKeyboard() {
         this.virtualKeyboard = document.createElement('div');
-        this.virtualKeyboard.style.cssText = `
-            position: fixed;
-            bottom: 100px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 107, 107, 0.3);
-            border-radius: 15px;
-            padding: 15px;
-            z-index: 100;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-            font-family: 'JetBrains Mono', monospace;
-        `;
+        this.virtualKeyboard.className = 'virtual-keyboard fixed bottom-[100px] right-5 bg-black/80 backdrop-blur-lg border border-unx-accent/30 rounded-2xl p-4 z-[100] opacity-0 translate-y-5 transition-all duration-300 font-jetbrains';
         
         const keys = [
             { label: '主题', key: 'ESC', action: () => this.toggleTheme() },
@@ -926,35 +883,22 @@ class UNXAIExperience {
         
         keys.forEach(keyInfo => {
             const keyButton = document.createElement('button');
-            keyButton.style.cssText = `
-                display: block;
-                width: 100%;
-                margin: 5px 0;
-                padding: 8px 12px;
-                background: rgba(255, 107, 107, 0.1);
-                border: 1px solid rgba(255, 107, 107, 0.3);
-                border-radius: 8px;
-                color: #ff6b6b;
-                font-size: 12px;
-                font-family: inherit;
-                cursor: pointer;
-                transition: all 0.2s ease;
-            `;
+            keyButton.className = 'block w-full my-1.5 px-3 py-2 bg-unx-accent/10 border border-unx-accent/30 rounded-lg text-unx-accent text-xs font-inherit cursor-pointer transition-all duration-200';
             
             keyButton.innerHTML = `
-                <div style="font-weight: bold;">${keyInfo.label}</div>
-                <div style="font-size: 10px; opacity: 0.7;">${keyInfo.key}</div>
+                <div class="font-bold">${keyInfo.label}</div>
+                <div class="text-[10px] opacity-70">${keyInfo.key}</div>
             `;
             
             keyButton.addEventListener('click', keyInfo.action);
             
             keyButton.addEventListener('mouseenter', () => {
-                keyButton.style.background = 'rgba(255, 107, 107, 0.2)';
+                keyButton.className = keyButton.className.replace('bg-unx-accent/10', 'bg-unx-accent/20');
                 keyButton.style.transform = 'scale(1.05)';
             });
             
             keyButton.addEventListener('mouseleave', () => {
-                keyButton.style.background = 'rgba(255, 107, 107, 0.1)';
+                keyButton.className = keyButton.className.replace('bg-unx-accent/20', 'bg-unx-accent/10');
                 keyButton.style.transform = 'scale(1)';
             });
             
@@ -965,14 +909,14 @@ class UNXAIExperience {
         
         // 显示虚拟键盘
         setTimeout(() => {
-            this.virtualKeyboard.style.opacity = '0.8';
-            this.virtualKeyboard.style.transform = 'translateY(0)';
+            this.virtualKeyboard.classList.remove('opacity-0', 'translate-y-5');
+            this.virtualKeyboard.classList.add('opacity-80', 'translate-y-0');
         }, 2000);
         
         // 5秒后自动隐藏
         setTimeout(() => {
-            this.virtualKeyboard.style.opacity = '0';
-            this.virtualKeyboard.style.transform = 'translateY(20px)';
+            this.virtualKeyboard.classList.remove('opacity-80', 'translate-y-0');
+            this.virtualKeyboard.classList.add('opacity-0', 'translate-y-5');
         }, 7000);
     }
     
@@ -1039,17 +983,7 @@ class UNXAIExperience {
     createLightningEffect() {
         // 闪电效果实现
         const lightning = document.createElement('div');
-        lightning.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 999;
-            opacity: 0;
-        `;
+        lightning.className = 'lightning-flash fixed top-0 left-0 w-full h-full pointer-events-none z-[999] opacity-0';
         
         document.body.appendChild(lightning);
         
@@ -1240,18 +1174,12 @@ class UNXAIExperience {
         
         const sizeConfig = sizes[size] || sizes.normal;
         
-        ripple.style.cssText = `
-            position: fixed;
-            left: ${x}px;
-            top: ${y}px;
-            width: ${sizeConfig.initial}px;
-            height: ${sizeConfig.initial}px;
-            border: ${sizeConfig.border}px solid rgba(255, 107, 107, 0.6);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-        `;
+        ripple.className = 'fixed rounded-full pointer-events-none z-[9999] transform -translate-x-1/2 -translate-y-1/2';
+        ripple.style.left = x + 'px';
+        ripple.style.top = y + 'px';
+        ripple.style.width = sizeConfig.initial + 'px';
+        ripple.style.height = sizeConfig.initial + 'px';
+        ripple.style.border = `${sizeConfig.border}px solid rgba(255, 107, 107, 0.6)`;
         
         document.body.appendChild(ripple);
         
@@ -1404,9 +1332,13 @@ class UNXAIExperience {
     }
     
     toggleVirtualKeyboard() {
-        if (!this.virtualKeyboard) return;
+        if (!this.virtualKeyboard) {
+            // 在桌面端显示提示
+            this.showTemporaryMessage('虚拟键盘仅在移动端可用', 1500);
+            return;
+        }
         
-        const isVisible = this.virtualKeyboard.style.opacity !== '0';
+        const isVisible = this.virtualKeyboard && !this.virtualKeyboard.classList.contains('opacity-0');
         
         gsap.to(this.virtualKeyboard, {
             opacity: isVisible ? 0 : 0.8,
@@ -1569,22 +1501,7 @@ class UNXAIExperience {
         // 创建临时消息元素
         const messageEl = document.createElement('div');
         messageEl.textContent = message;
-        messageEl.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: #ff6b6b;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
-            z-index: 9999;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 107, 107, 0.3);
-            pointer-events: none;
-        `;
+        messageEl.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 text-unx-accent px-6 py-3 rounded-lg font-jetbrains text-sm z-[9999] backdrop-blur-lg border border-unx-accent/30 pointer-events-none';
         
         document.body.appendChild(messageEl);
         

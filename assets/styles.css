@@ -1,6 +1,3 @@
-/* UNXAI 核心样式 - 现代化科技美学 */
-/* 专注于极简设计、优雅交互和流畅动画 */
-
 /* =========================
    关键帧动画定义
    ========================= */
@@ -70,10 +67,9 @@
 }
 
 /* =========================
-   文字效果和渐变
+   文字渐变效果（Tailwind无法实现background-clip: text）
    ========================= */
 
-/* 主标题渐变 - 高对比度 */
 .text-gradient {
     background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 50%, #cccccc 100%);
     -webkit-background-clip: text;
@@ -82,7 +78,6 @@
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-/* 品牌色渐变 */
 .accent-gradient {
     background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 30%, #ffaaaa 70%, #ffffff 100%);
     -webkit-background-clip: text;
@@ -91,16 +86,8 @@
 }
 
 /* =========================
-   现代化按钮系统
+   按钮特效（伪元素动画，Tailwind无法实现）
    ========================= */
-
-/* GitHub按钮特效 */
-.modern-btn {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(10px);
-}
 
 .modern-btn::before {
     content: '';
@@ -134,34 +121,17 @@
 }
 
 /* =========================
-   简洁Logo效果系统
+   Logo动画效果（关键帧动画和复杂变换）
    ========================= */
 
-/* Logo容器 */
-.logo-container {
-    position: relative;
-    cursor: pointer;
-    perspective: 1000px;
-    transition: all 0.3s ease;
-}
-
-/* Logo球体主体 - 地球效果 */
 .logo-sphere {
-    position: relative;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-style: preserve-3d;
     animation: float 4s ease-in-out infinite;
 }
 
-/* 球体效果 */
 .sphere-effect {
     animation: sphere-glow 6s ease-in-out infinite;
-    border-radius: 50%;
-    position: relative;
-    overflow: hidden;
 }
 
-/* 悬停增强效果 */
 .logo-container:hover .logo-sphere {
     transform: scale(1.05);
     animation-duration: 2s;
@@ -172,13 +142,11 @@
     filter: brightness(1.15) contrast(1.1);
 }
 
-/* 点击效果 */
 .logo-container:active .logo-sphere {
     transform: scale(0.95);
     transition: all 0.1s ease;
 }
 
-/* 焦点样式 */
 .logo-container:focus-visible {
     outline: 2px solid #ff6b6b;
     outline-offset: 4px;
@@ -186,10 +154,9 @@
 }
 
 /* =========================
-   交互提示系统
+   交互提示特效（复杂变换和动画）
    ========================= */
 
-/* 交互提示容器 */
 .interaction-hints {
     pointer-events: none;
 }
@@ -198,11 +165,9 @@
     pointer-events: auto;
 }
 
-/* 快捷键提示面板 */
 #keyboard-hints {
     transition: opacity 0.3s ease, transform 0.3s ease;
     transform: translateY(-10px);
-    top: 5rem;
 }
 
 #keyboard-hints:hover {
@@ -210,77 +175,24 @@
     transform: translateY(0);
 }
 
-/* 移动端提示优化 */
 #mobile-hint {
-    backdrop-filter: blur(15px);
     animation: fadeInUp 1s ease-out;
 }
 
-/* 状态指示器呼吸效果 */
 [role="status"] .animate-pulse {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* =========================
-   响应式设计
+   响应式特定动画调整（无法用Tailwind media queries实现的复杂逻辑）
    ========================= */
 
-/* 移动端优化 */
 @media (max-width: 768px) {
     .logo-sphere {
         animation-duration: 6s;
     }
-    
-    #keyboard-hints {
-        display: none !important;
-    }
-    
-    #mobile-hint {
-        bottom: 5rem;
-        left: 1rem;
-        right: 1rem;
-        padding: 0.75rem;
-        z-index: 45;
-    }
-    
-    footer {
-        padding: 1rem;
-    }
-    
-    footer .flex {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    footer .text-xs {
-        font-size: 0.65rem;
-    }
 }
 
-/* 极小屏幕适配 */
-@media (max-width: 480px) {
-    #mobile-hint {
-        bottom: 6rem;
-        font-size: 0.8rem;
-        padding: 0.5rem;
-    }
-    
-    footer {
-        padding: 0.75rem;
-    }
-    
-    .modern-btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-    }
-    
-    .modern-btn .w-5 {
-        width: 1rem;
-        height: 1rem;
-    }
-}
-
-/* 大屏幕优化 */
 @media (min-width: 1920px) {
     .logo-sphere {
         width: 4.5rem;
@@ -288,44 +200,14 @@
     }
 }
 
-/* 快捷键提示响应式 */
-@media (max-width: 1024px) {
-    #keyboard-hints {
-        top: 4.5rem;
-        right: 1rem;
-    }
-}
-
-@media (max-height: 800px) {
-    #keyboard-hints {
-        top: 4rem;
-    }
-}
-
 @media (max-height: 700px) {
     #keyboard-hints {
-        top: 3.5rem;
         font-size: 0.7rem;
-    }
-    
-    #keyboard-hints .p-4 {
-        padding: 0.75rem;
-    }
-    
-    nav {
-        padding: 1rem 1.5rem;
     }
     
     .logo-sphere {
         width: 3.5rem;
         height: 3.5rem;
-    }
-}
-
-/* 特殊条件优化 */
-@media (max-height: 600px) {
-    #mobile-hint {
-        display: none !important;
     }
 }
 
@@ -342,33 +224,18 @@
 }
 
 /* =========================
-   工具类和修饰符
+   必要的工具类（Tailwind已内置sr-only，删除重复定义）
    ========================= */
 
-/* 无障碍支持 */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-/* 高性能变换 */
 .gpu-accelerated {
     transform: translateZ(0);
     will-change: transform;
 }
 
 /* =========================
-   创意交互效果样式
+   创意交互特效关键帧动画
    ========================= */
 
-/* 扫描线动画 */
 @keyframes scan-line {
     0% {
         transform: translateY(-100vh);
@@ -386,7 +253,6 @@
     }
 }
 
-/* 能量波纹效果 */
 @keyframes energy-ripple {
     0% {
         transform: scale(0) rotate(0deg);
@@ -401,7 +267,6 @@
     }
 }
 
-/* 粒子跟随效果 */
 @keyframes particle-follow {
     0%, 100% {
         transform: scale(1);
@@ -411,35 +276,6 @@
         transform: scale(1.2);
         opacity: 1;
     }
-}
-
-/* 虚拟键盘样式 */
-.virtual-keyboard {
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 107, 107, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.virtual-keyboard button {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.virtual-keyboard button:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
-}
-
-.virtual-keyboard button:active {
-    transform: translateY(0) scale(0.95);
-}
-
-/* 手势轨迹效果 */
-.gesture-trail {
-    position: fixed;
-    pointer-events: none;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 107, 107, 0.6) 0%, transparent 70%);
-    animation: gesture-fade 2s ease-out forwards;
 }
 
 @keyframes gesture-fade {
@@ -453,57 +289,45 @@
     }
 }
 
-/* 声音可视化效果 */
-.audio-visualizer {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    width: 100px;
-    height: 20px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 10px;
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-}
-
-.audio-bar {
-    display: inline-block;
-    width: 3px;
-    background: linear-gradient(to top, #ff6b6b, #ffaaaa);
-    margin: 0 1px;
-    border-radius: 2px;
-    transition: height 0.1s ease;
-}
-
-/* 时间扭曲效果 */
-.time-warp-active {
-    filter: contrast(1.2) saturate(1.3) hue-rotate(10deg);
-    transition: filter 0.5s ease;
-}
-
-/* 闪电效果 */
-.lightning-flash {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 999;
-    animation: lightning-flash 0.3s ease-out;
-}
-
 @keyframes lightning-flash {
     0% { opacity: 0; }
     10% { opacity: 0.8; }
     100% { opacity: 0; }
 }
 
-/* 增强的帮助面板 */
+/* =========================
+   无法用Tailwind实现的复杂样式类
+   ========================= */
+
+.virtual-keyboard button:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+}
+
+.virtual-keyboard button:active {
+    transform: translateY(0) scale(0.95);
+}
+
+.gesture-trail {
+    background: radial-gradient(circle, rgba(255, 107, 107, 0.6) 0%, transparent 70%);
+    animation: gesture-fade 2s ease-out forwards;
+}
+
+.audio-bar {
+    background: linear-gradient(to top, #ff6b6b, #ffaaaa);
+}
+
+.time-warp-active {
+    filter: contrast(1.2) saturate(1.3) hue-rotate(10deg);
+    transition: filter 0.5s ease;
+}
+
+.lightning-flash {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: lightning-flash 0.3s ease-out;
+}
+
 #keyboard-hints {
-    max-height: 400px;
-    overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 107, 107, 0.5) transparent;
 }
@@ -526,29 +350,16 @@
     background: rgba(255, 107, 107, 0.7);
 }
 
-/* 连接线画布优化 */
 .connection-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    pointer-events: none;
     mix-blend-mode: screen;
 }
 
-/* 粒子跟随者样式 */
 .particle-follower {
-    position: fixed;
-    width: 4px;
-    height: 4px;
     background: radial-gradient(circle, #ff6b6b, transparent);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 100;
     animation: particle-follow 3s ease-in-out infinite;
     box-shadow: 0 0 10px rgba(255, 107, 107, 0.8);
 }
 
-/* 性能优化 */
 .gpu-optimized {
     transform: translateZ(0);
     will-change: transform, opacity;
