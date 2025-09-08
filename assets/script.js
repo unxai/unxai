@@ -25,7 +25,6 @@ class UNXAIExperience {
         this.audioContext = null;
         this.analyser = null;
         this.mouseTrail = [];
-        this.gestureBuffer = [];
         this.lastMouseTime = 0;
         this.energyLevel = 0;
         this.isTimeWarpActive = false;
@@ -35,7 +34,6 @@ class UNXAIExperience {
         this.voiceAmplitude = 0;
         this.mouseVelocity = { x: 0, y: 0 };
         this.lastMousePos = { x: 0, y: 0 };
-        this.gestureRecognitionEnabled = true;
         
         // 初始化系统
         this.init();
@@ -366,7 +364,6 @@ class UNXAIExperience {
         
         // 初始化各种创意交互模块
         this.initAudioVisualization();
-        this.initGestureRecognition();
         this.initSmartParticleSystem();
         this.initScanLineEffect();
         this.initEnergyConnections();
@@ -422,165 +419,13 @@ class UNXAIExperience {
         updateAudioData();
     }
     
-    // 手势识别初始化
-    initGestureRecognition() {
-        this.gesturePatterns = {
-            circle: {
-                name: '圈形',
-                action: () => this.triggerCircleGesture(),
-                pattern: this.detectCirclePattern.bind(this)
-            },
-            lightning: {
-                name: '闪电',
-                action: () => this.triggerLightningGesture(),
-                pattern: this.detectLightningPattern.bind(this)
-            },
-            wave: {
-                name: '波浪',
-                action: () => this.triggerWaveGesture(),
-                pattern: this.detectWavePattern.bind(this)
-            }
-        };
-        
-        // 手势识别定时器
-        setInterval(() => {
-            if (this.gestureRecognitionEnabled) {
-                this.analyzeGestures();
-            }
-        }, 500);
-    }
-    
-    // 记录鼠标轨迹
+    // 记录鼠标轨迹（简化版，仅用于粒子跟随）
     recordMouseTrail(x, y) {
         const now = Date.now();
         this.mouseTrail.push({ x, y, time: now });
         
-        // 只保留最近5秒的轨迹
-        this.mouseTrail = this.mouseTrail.filter(point => now - point.time < 5000);
-        
-        // 记录手势缓冲
-        if (this.gestureRecognitionEnabled) {
-            this.gestureBuffer.push({ x, y, time: now });
-            if (this.gestureBuffer.length > 20) {
-                this.gestureBuffer.shift();
-            }
-        }
-    }
-    
-    // 手势分析
-    analyzeGestures() {
-        if (this.gestureBuffer.length < 5) return;
-        
-        for (const [key, gesture] of Object.entries(this.gesturePatterns)) {
-            if (gesture.pattern(this.gestureBuffer)) {
-                gesture.action();
-                this.gestureBuffer = []; // 清空缓冲
-                this.showTemporaryMessage(`手势识别: ${gesture.name}`, 1500);
-                break;
-            }
-        }
-    }
-    
-    // 圈形手势检测
-    detectCirclePattern(buffer) {
-        if (buffer.length < 8) return false;
-        
-        const centerX = buffer.reduce((sum, p) => sum + p.x, 0) / buffer.length;
-        const centerY = buffer.reduce((sum, p) => sum + p.y, 0) / buffer.length;
-        
-        let angleSum = 0;
-        for (let i = 1; i < buffer.length; i++) {
-            const angle1 = Math.atan2(buffer[i-1].y - centerY, buffer[i-1].x - centerX);
-            const angle2 = Math.atan2(buffer[i].y - centerY, buffer[i].x - centerX);
-            let angleDiff = angle2 - angle1;
-            
-            if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-            if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
-            
-            angleSum += angleDiff;
-        }
-        
-        return Math.abs(angleSum) > Math.PI * 1.5; // 至少转了270度
-    }
-    
-    // 闪电手势检测（之字形）
-    detectLightningPattern(buffer) {
-        if (buffer.length < 6) return false;
-        
-        let directionChanges = 0;
-        let lastDirection = null;
-        
-        for (let i = 1; i < buffer.length; i++) {
-            const deltaX = buffer[i].x - buffer[i-1].x;
-            const deltaY = buffer[i].y - buffer[i-1].y;
-            const currentDirection = Math.sign(deltaX) + Math.sign(deltaY) * 2;
-            
-            if (lastDirection !== null && currentDirection !== lastDirection) {
-                directionChanges++;
-            }
-            lastDirection = currentDirection;
-        }
-        
-        return directionChanges >= 3; // 至少匃3次方向变化
-    }
-    
-    // 波浪手势检测（水平波浪形）
-    detectWavePattern(buffer) {
-        if (buffer.length < 8) return false;
-        
-        let peaks = 0;
-        let valleys = 0;
-        
-        for (let i = 1; i < buffer.length - 1; i++) {
-            const prev = buffer[i-1].y;
-            const curr = buffer[i].y;
-            const next = buffer[i+1].y;
-            
-            if (curr > prev && curr > next) peaks++;
-            if (curr < prev && curr < next) valleys++;
-        }
-        
-        return peaks >= 2 && valleys >= 2;
-    }
-    
-    // 手势动作实现
-    triggerCircleGesture() {
-        // 圆形能量波效果
-        this.createRippleEffect(window.innerWidth / 2, window.innerHeight / 2, 'large');
-        
-        // 粒子系统旋转效果
-        if (this.particles) {
-            gsap.to(this.particles.rotation, {
-                y: this.particles.rotation.y + Math.PI * 2,
-                duration: 2,
-                ease: "power2.out"
-            });
-        }
-        
-        // 主题颜色旋转
-        this.cycleTheme();
-    }
-    
-    triggerLightningGesture() {
-        // 闪电效果
-        this.createLightningEffect();
-        
-        // 时间略微扰曲
-        this.temporaryTimeWarp(1000);
-    }
-    
-    triggerWaveGesture() {
-        // 波浪效果
-        this.createWaveEffect();
-        
-        // 粒子波动
-        if (this.particles) {
-            gsap.to(this.particles.material.uniforms.time, {
-                value: this.particles.material.uniforms.time.value + 50,
-                duration: 3,
-                ease: "sine.inOut"
-            });
-        }
+        // 只保留最近3秒的轨迹
+        this.mouseTrail = this.mouseTrail.filter(point => now - point.time < 3000);
     }
     
     // 智能粒子系统
@@ -833,8 +678,6 @@ class UNXAIExperience {
         });
         
         // 显示时间扰曲指示
-        this.showTemporaryMessage('时间扰曲激活', 500);
-        
         console.log('⏱️ 时间扰曲激活');
     }
     
@@ -1020,7 +863,7 @@ class UNXAIExperience {
     }
     
     cycleTheme() {
-        // 快速切换主题
+        // 快速切换主题（用于圈形手势）
         const themes = ['default', 'blue', 'green', 'purple', 'orange'];
         const currentIndex = themes.indexOf(this.currentTheme);
         
@@ -1222,7 +1065,6 @@ class UNXAIExperience {
             if (tapLength < 500 && tapLength > 0) {
                 e.preventDefault();
                 this.triggerEnergyBurst();
-                this.showTemporaryMessage('双击特效!', 1500);
             }
             
             lastTap = currentTime;
@@ -1291,14 +1133,6 @@ class UNXAIExperience {
                     e.preventDefault();
                     this.resetExperience();
                     break;
-                case 'g':
-                    e.preventDefault();
-                    this.toggleGestureRecognition();
-                    break;
-                case 'v':
-                    e.preventDefault();
-                    this.toggleVirtualKeyboard();
-                    break;
                 case 'l':
                     e.preventDefault();
                     this.triggerLightningGesture();
@@ -1323,19 +1157,9 @@ class UNXAIExperience {
     }
     
     // 新增的键盘功能
-    toggleGestureRecognition() {
-        this.gestureRecognitionEnabled = !this.gestureRecognitionEnabled;
-        this.showTemporaryMessage(
-            `手势识别: ${this.gestureRecognitionEnabled ? '开启' : '关闭'}`,
-            1500
-        );
-    }
-    
     toggleVirtualKeyboard() {
         if (!this.virtualKeyboard) {
-            // 在桌面端显示提示
-            this.showTemporaryMessage('虚拟键盘仅在移动端可用', 1500);
-            return;
+            return; // 静默处理，不显示提示
         }
         
         const isVisible = this.virtualKeyboard && !this.virtualKeyboard.classList.contains('opacity-0');
@@ -1449,9 +1273,6 @@ class UNXAIExperience {
             ease: "power2.inOut"
         });
         
-        // 显示主题名称
-        this.showTemporaryMessage(`主题: ${this.currentTheme.toUpperCase()}`);
-        
         console.log(`🎨 切换主题: ${this.currentTheme}`);
     }
     
@@ -1497,40 +1318,53 @@ class UNXAIExperience {
         return themes[this.currentTheme] || 'none';
     }
     
-    showTemporaryMessage(message, duration = 2000) {
-        // 创建临时消息元素
-        const messageEl = document.createElement('div');
-        messageEl.textContent = message;
-        messageEl.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 text-unx-accent px-6 py-3 rounded-lg font-jetbrains text-sm z-[9999] backdrop-blur-lg border border-unx-accent/30 pointer-events-none';
+    // === 手势动画方法 ===
+    triggerLightningGesture() {
+        console.log('⚡ 闪电手势触发');
         
-        document.body.appendChild(messageEl);
+        // 创建闪电效果
+        this.createLightningEffect();
         
-        // 动画显示和隐藏
-        gsap.fromTo(messageEl, 
-            { 
-                opacity: 0, 
-                scale: 0.8,
-                y: 20
-            },
-            {
-                opacity: 1,
-                scale: 1,
-                y: 0,
-                duration: 0.3,
-                ease: "back.out(1.7)"
-            }
-        );
+        // 增强粒子能量
+        this.energyLevel = 1;
         
-        setTimeout(() => {
-            gsap.to(messageEl, {
-                opacity: 0,
-                scale: 0.8,
-                y: -20,
-                duration: 0.3,
-                ease: "power2.inOut",
-                onComplete: () => messageEl.remove()
-            });
-        }, duration);
+        // 临时时间扭曲
+        this.temporaryTimeWarp(1000);
+    }
+    
+    triggerWaveGesture() {
+        console.log('🌊 波浪手势触发');
+        
+        // 创建波浪效果
+        this.createWaveEffect();
+        
+        // 多重涟漪效果
+        for (let i = 0; i < 8; i++) {
+            setTimeout(() => {
+                this.createRippleEffect(
+                    Math.random() * window.innerWidth,
+                    Math.random() * window.innerHeight,
+                    'medium'
+                );
+            }, i * 100);
+        }
+    }
+    
+    triggerCircleGesture() {
+        console.log('⭕ 圆圈手势触发');
+        
+        // 快速主题循环
+        this.cycleTheme();
+        
+        // 创建圆形扩散效果
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                this.createRippleEffect(centerX, centerY, 'large');
+            }, i * 300);
+        }
     }
     
     toggleFullscreen() {
