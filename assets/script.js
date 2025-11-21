@@ -1,1420 +1,649 @@
-// UNXAI 现代化展示页 - 极简科技美学
-// 基于 Three.js + GSAP 的创新交互体验
-// 优化性能、增强交互、完善体验
+/**
+ * UNXAI - Ethereal Intelligence Experience
+ * 
+ * Core Systems:
+ * 1. 3D Neural Constellation (Three.js)
+ * 2. UI Animations (GSAP)
+ * 3. Interaction Management
+ * 4. Dynamic Data Layer (GitHub API)
+ */
 
-class UNXAIExperience {
+class UNXAIApp {
     constructor() {
-        // 核心系统属性
-        this.scene = null;
-        this.camera = null;
-        this.renderer = null;
-        this.particles = null;
-        
-        // 交互状态
-        this.mouse = { x: 0, y: 0 };
-        this.isInitialized = false;
-        this.currentTheme = 'default';
-        this.helpVisible = false;
-        
-        // 性能自适应系统
-        this.isMobile = this.detectMobile();
-        this.particleCount = this.isMobile ? 300 : 800;
-        this.performanceLevel = this.detectPerformance();
-        
-        // 新增创意交互属性
-        this.audioContext = null;
-        this.analyser = null;
-        this.mouseTrail = [];
-        this.lastMouseTime = 0;
-        this.energyLevel = 0;
-        this.isTimeWarpActive = false;
-        this.scanLines = [];
-        this.particleConnections = [];
-        this.virtualKeyboard = null;
-        this.voiceAmplitude = 0;
-        this.mouseVelocity = { x: 0, y: 0 };
-        this.lastMousePos = { x: 0, y: 0 };
-        
-        // 初始化系统
-        this.init();
+        this.terminal = new SystemTerminal();
+        this.github = new GitHubService(this.terminal);
+
+        this.initLoader();
+        this.initThreeJS();
+        this.initUI();
+        this.initAnimations();
+        this.initData();
     }
-    
-    // 设备检测与性能优化
-    detectMobile() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-               window.innerWidth < 768;
-    }
-    
-    detectPerformance() {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        
-        if (!gl) return 'low';
-        
-        const renderer = gl.getParameter(gl.RENDERER);
-        
-        if (renderer.includes('Intel') || renderer.includes('Microsoft')) {
-            return 'medium';
-        }
-        
-        return navigator.hardwareConcurrency > 4 ? 'high' : 'medium';
-    }
-    
-    async init() {
-        try {
-            console.log('🚀 UNXAI Experience 初始化...');
-            
-            // 等待DOM加载
-            await this.waitForDOM();
-            
-            // 初始化各系统
-            await this.initSystems();
-            
-            this.isInitialized = true;
-            console.log('✅ UNXAI Experience 初始化完成');
-            
-            // 触发初始化完成事件
-            this.dispatchCustomEvent('unxai:initialized');
-            
-        } catch (error) {
-            console.error('❌ UNXAI 初始化失败:', error);
-            this.handleError(error);
-        }
-    }
-    
-    // 等待DOM加载完成
-    waitForDOM() {
-        return new Promise(resolve => {
-            if (document.readyState === 'complete') {
-                resolve();
+
+    // === Loader System ===
+    initLoader() {
+        const loader = document.getElementById('loader');
+        const progress = document.querySelector('.loader-progress');
+
+        this.terminal.log("System Boot Sequence Initiated...");
+
+        let loadValue = 0;
+        const interval = setInterval(() => {
+            loadValue += Math.random() * 10;
+            if (loadValue >= 100) {
+                loadValue = 100;
+                clearInterval(interval);
+
+                gsap.to(progress, { width: '100%', duration: 0.5 });
+                gsap.to(loader, {
+                    opacity: 0,
+                    visibility: 'hidden',
+                    delay: 0.5,
+                    duration: 0.8,
+                    onComplete: () => {
+                        this.startEntranceAnimations();
+                        this.terminal.log("Core Systems Online.");
+                    }
+                });
             } else {
-                window.addEventListener('load', resolve, { once: true });
+                progress.style.width = `${loadValue}%`;
             }
-        });
+        }, 100);
     }
-    
-    // 初始化所有系统
-    async initSystems() {
-        const systems = [
-            () => this.initThreeJS(),
-            () => this.initAnimations(),
-            () => this.initInteractions(),
-            () => this.initKeyboardControls(),
-            () => this.initHelpSystem(),
-            () => this.initCreativeInteractions(), // 新增创意交互
-            () => this.startRenderLoop()
-        ];
-        
-        for (const system of systems) {
-            try {
-                await system();
-                await this.delay(50); // 稍微延迟以避免阻塞
-            } catch (error) {
-                console.warn('系统初始化警告:', error);
-            }
-        }
+
+    // === Data System ===
+    async initData() {
+        this.terminal.log("Establishing Neural Link to GitHub...");
+
+        // Fetch Projects
+        const projects = await this.github.getRepositories();
+        this.renderProjects(projects);
+
+        // Fetch Team
+        const team = await this.github.getMembers();
+        this.renderTeam(team);
     }
-    
-    // 工具方法
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    
-    dispatchCustomEvent(eventName, detail = {}) {
-        const event = new CustomEvent(eventName, { detail });
-        document.dispatchEvent(event);
-    }
-    
-    handleError(error) {
-        // 简单的错误处理，可以扩展为更复杂的错误报告系统
-        console.error('UNXAI 系统错误:', error);
-        
-        // 在生产环境中，可以发送错误到监控系统
-        if (typeof gtag !== 'undefined') {
-            gtag('event', 'exception', {
-                description: error.message,
-                fatal: false
+
+    renderProjects(projects) {
+        const container = document.getElementById('projects-grid');
+        if (!container) return;
+
+        container.innerHTML = ''; // Clear loading state
+
+        projects.forEach((repo, index) => {
+            const card = document.createElement('article');
+            card.className = 'project-card glass-card';
+            card.style.opacity = '0'; // For animation
+
+            const techStack = repo.language || 'Code';
+
+            card.innerHTML = `
+                <div class="project-image" style="background-image: url('${PatternGenerator.generate(repo.name)}')">
+                    <div class="project-overlay"></div>
+                    <div class="project-tech">
+                        <span>${techStack}</span>
+                        <span>${repo.stargazers_count} ★</span>
+                    </div>
+                </div>
+                <div class="project-content">
+                    <h3>${repo.name}</h3>
+                    <p>${repo.description || 'Exploring the unknown...'}</p>
+                    <div class="project-links">
+                        <a href="${repo.html_url}" target="_blank" class="text-link">View Code <span class="arrow">→</span></a>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(card);
+
+            // Staggered Animation
+            gsap.to(card, {
+                opacity: 1,
+                y: 0,
+                duration: 0.5,
+                delay: index * 0.1,
+                scrollTrigger: {
+                    trigger: container,
+                    start: "top 80%"
+                }
             });
-        }
-    }
-    
-    // === Three.js 3D 系统 ===
-    initThreeJS() {
-        console.log('🎬 初始化 3D 环境...');
-        
-        const container = document.getElementById('threejs-container');
-        
-        // 创建场景
-        this.scene = new THREE.Scene();
-        
-        // 创建相机
-        this.camera = new THREE.PerspectiveCamera(
-            75,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            1000
-        );
-        this.camera.position.z = 50;
-        
-        // 创建渲染器
-        this.renderer = new THREE.WebGLRenderer({
-            antialias: true,
-            alpha: true,
-            powerPreference: "high-performance"
         });
+
+        this.terminal.log(`Loaded ${projects.length} Project Modules.`);
+    }
+
+    renderTeam(members) {
+        const container = document.getElementById('team-grid');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        members.forEach((member, index) => {
+            const card = document.createElement('div');
+            card.className = 'team-member glass-card';
+            card.style.opacity = '0';
+
+            card.innerHTML = `
+                <div class="member-avatar">
+                    <img src="${member.avatar_url}" alt="${member.login}">
+                </div>
+                <h3>${member.login}</h3>
+                <span class="member-role">Agent</span>
+                <a href="${member.html_url}" target="_blank" class="text-link" style="font-size: 0.8rem; margin-top: 0.5rem;">Profile</a>
+            `;
+
+            container.appendChild(card);
+
+            gsap.to(card, {
+                opacity: 1,
+                y: 0,
+                duration: 0.5,
+                delay: index * 0.1,
+                scrollTrigger: {
+                    trigger: container,
+                    start: "top 80%"
+                }
+            });
+        });
+
+        this.terminal.log(`Identified ${members.length} Active Agents.`);
+    }
+
+    // === 3D System ===
+    initThreeJS() {
+        const container = document.getElementById('canvas-container');
+
+        this.scene = new THREE.Scene();
+        this.scene.fog = new THREE.FogExp2(0x050505, 0.002);
+
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.camera.position.z = 30;
+
+        this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        this.renderer.setClearColor(0x000000, 0);
-        
         container.appendChild(this.renderer.domElement);
-        
-        // 创建粒子系统
-        this.createParticleField();
-        
-        // 响应式处理
-        window.addEventListener('resize', () => this.handleResize());
-        
-        // 鼠标跟踪用于3D交互
-        document.addEventListener('mousemove', (e) => {
-            const prevMouse = { x: this.mouse.x, y: this.mouse.y };
-            this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-            
-            // 计算鼠标速度
-            this.mouseVelocity.x = this.mouse.x - prevMouse.x;
-            this.mouseVelocity.y = this.mouse.y - prevMouse.y;
-            
-            // 记录鼠标轨迹
-            this.recordMouseTrail(e.clientX, e.clientY);
-            
-            // 更新能量等级
-            const velocity = Math.sqrt(this.mouseVelocity.x ** 2 + this.mouseVelocity.y ** 2);
-            this.energyLevel = Math.min(this.energyLevel + velocity * 0.5, 1);
-        });
-        
-        console.log('✅ 3D 环境初始化完成');
+
+        this.createNeuralNetwork();
+        this.createAmbientParticles();
+
+        window.addEventListener('resize', () => this.onWindowResize());
+        document.addEventListener('mousemove', (e) => this.onMouseMove(e));
+
+        this.animate();
     }
-    
-    // 创建极简粒子场
-    createParticleField() {
+
+    createNeuralNetwork() {
+        const particleCount = 600;
         const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(this.particleCount * 3);
-        const colors = new Float32Array(this.particleCount * 3);
-        const sizes = new Float32Array(this.particleCount);
-        
-        // 红色系配色方案
-        const colorPalette = [
-            new THREE.Color(0xff6b6b), // 主要红色
-            new THREE.Color(0xff8e8e), // 浅红色
-            new THREE.Color(0xffaaaa), // 更浅红色
-            new THREE.Color(0xffffff)  // 白色
-        ];
-        
-        for (let i = 0; i < this.particleCount; i++) {
-            // 更优雅的分布
-            positions[i * 3] = (Math.random() - 0.5) * 200;
-            positions[i * 3 + 1] = (Math.random() - 0.5) * 200;
-            positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
-            
-            // 精选配色
-            const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-            colors[i * 3] = color.r;
-            colors[i * 3 + 1] = color.g;
-            colors[i * 3 + 2] = color.b;
-            
-            // 更精细的尺寸控制
-            sizes[i] = Math.random() * 2 + 0.5;
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        const sizes = new Float32Array(particleCount);
+
+        const color1 = new THREE.Color(0x3b82f6);
+        const color2 = new THREE.Color(0x8b5cf6);
+
+        for (let i = 0; i < particleCount; i++) {
+            const r = 20 + Math.random() * 10;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+
+            positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+            positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+            positions[i * 3 + 2] = r * Math.cos(phi);
+
+            const mixedColor = color1.clone().lerp(color2, Math.random());
+            colors[i * 3] = mixedColor.r;
+            colors[i * 3 + 1] = mixedColor.g;
+            colors[i * 3 + 2] = mixedColor.b;
+
+            sizes[i] = Math.random() * 2;
         }
-        
+
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-        
-        // 现代化着色器
-        const material = new THREE.ShaderMaterial({
-            uniforms: {
-                time: { value: 0 },
-                mouse: { value: new THREE.Vector2() },
-                resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
-            },
-            vertexShader: `
-                attribute float size;
-                varying vec3 vColor;
-                varying float vSize;
-                uniform float time;
-                uniform vec2 mouse;
-                
-                void main() {
-                    vColor = color;
-                    vSize = size;
-                    
-                    vec3 pos = position;
-                    
-                    // 优雅的波动效果
-                    pos.x += sin(time * 0.001 + pos.y * 0.01) * 5.0;
-                    pos.y += cos(time * 0.001 + pos.x * 0.01) * 5.0;
-                    pos.z += sin(time * 0.002) * 2.0;
-                    
-                    // 鼠标交互
-                    float mouseInfluence = 1.0 - distance(mouse, vec2(pos.x, pos.y) / 100.0) * 0.5;
-                    pos.z += mouseInfluence * 10.0;
-                    
-                    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                    gl_Position = projectionMatrix * mvPosition;
-                    gl_PointSize = vSize * (50.0 / -mvPosition.z);
-                }
-            `,
-            fragmentShader: `
-                varying vec3 vColor;
-                varying float vSize;
-                
-                void main() {
-                    float r = distance(gl_PointCoord, vec2(0.5, 0.5));
-                    if (r > 0.5) discard;
-                    
-                    float alpha = 1.0 - smoothstep(0.0, 0.5, r);
-                    alpha *= 0.6; // 降低整体透明度
-                    
-                    gl_FragColor = vec4(vColor, alpha);
-                }
-            `,
-            transparent: true,
+
+        const material = new THREE.PointsMaterial({
+            size: 0.2,
             vertexColors: true,
-            blending: THREE.AdditiveBlending
+            transparent: true,
+            opacity: 0.8,
+            sizeAttenuation: true
         });
-        
+
         this.particles = new THREE.Points(geometry, material);
         this.scene.add(this.particles);
-    }
-    
-    // === GSAP 动画系统 ===
-    initAnimations() {
-        console.log('✨ 初始化动画系统...');
-        
-        // 页面加载动画序列
-        const tl = gsap.timeline();
-        
-        // 优雅的入场动画
-        tl.from('#main-title', {
-            y: 100,
-            opacity: 0,
-            scale: 0.9,
-            duration: 1.5,
-            ease: "power3.out"
-        })
-        .from('#subtitle', {
-            y: 50,
-            opacity: 0,
-            duration: 1,
-            ease: "power2.out"
-        }, "-=1")
-        .from('#subtitle-en', {
-            y: 30,
-            opacity: 0,
-            duration: 0.8,
-            ease: "power2.out"
-        }, "-=0.8")
-        .from('[class*="bg-white/5"]', {
-            y: 60,
-            opacity: 0,
-            scale: 0.95,
-            duration: 1.2,
-            ease: "power2.out"
-        }, "-=0.6");
-        
-        // 连续动画效果
-        this.setupContinuousAnimations();
-        
-        console.log('✅ 动画系统初始化完成');
-    }
-    
-    setupContinuousAnimations() {
-        // Logo 悬浮动画
-        gsap.to('.logo-container', {
-            y: 5,
-            duration: 3,
-            ease: "power2.inOut",
-            yoyo: true,
-            repeat: -1
-        });
-        
-        // 主标题呼吸效果
-        gsap.to('#main-title', {
-            scale: 1.02,
-            duration: 4,
-            ease: "power2.inOut",
-            yoyo: true,
-            repeat: -1
-        });
-        
-        // 微妙的背景动画
-        if (this.particles) {
-            gsap.to(this.particles.rotation, {
-                y: Math.PI * 2,
-                duration: 120,
-                ease: "none",
-                repeat: -1
-            });
+
+        // Add Pulse Lines (Simplified Neural Connections)
+        const lineGeo = new THREE.BufferGeometry();
+        const linePos = [];
+        // Create a few random connections for visual effect
+        for (let i = 0; i < 100; i++) {
+            const idx1 = Math.floor(Math.random() * particleCount);
+            const idx2 = Math.floor(Math.random() * particleCount);
+
+            linePos.push(
+                positions[idx1 * 3], positions[idx1 * 3 + 1], positions[idx1 * 3 + 2],
+                positions[idx2 * 3], positions[idx2 * 3 + 1], positions[idx2 * 3 + 2]
+            );
         }
-    }
-    
-    // === 创意交互系统 ===
-    initCreativeInteractions() {
-        console.log('🎆 初始化创意交互系统...');
-        
-        // 初始化各种创意交互模块
-        this.initAudioVisualization();
-        this.initSmartParticleSystem();
-        this.initScanLineEffect();
-        this.initEnergyConnections();
-        this.initTimeWarpEffect();
-        this.initVirtualKeyboard();
-        this.initVoiceInteraction();
-        
-        console.log('✅ 创意交互系统初始化完成');
-    }
-    
-    // 音频可视化初始化
-    async initAudioVisualization() {
-        try {
-            // 创建虚拟音频上下文（不需要真实音频输入）
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            this.analyser = this.audioContext.createAnalyser();
-            this.analyser.fftSize = 256;
-            
-            // 创建虚拟音频数据
-            this.frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
-            
-            // 模拟音频数据更新
-            this.startAudioSimulation();
-            
-        } catch (error) {
-            console.warn('音频初始化警告:', error);
-        }
-    }
-    
-    // 模拟音频数据
-    startAudioSimulation() {
-        const updateAudioData = () => {
-            // 根据鼠标移动和能量等级模拟音频
-            const baseLevel = this.energyLevel * 100;
-            const velocity = Math.sqrt(this.mouseVelocity.x ** 2 + this.mouseVelocity.y ** 2);
-            
-            for (let i = 0; i < this.frequencyData.length; i++) {
-                const frequency = (i / this.frequencyData.length) * 100;
-                const noise = Math.random() * 20;
-                const mouseInfluence = velocity * 50 * Math.sin(Date.now() * 0.01 + i * 0.1);
-                
-                this.frequencyData[i] = Math.max(0, Math.min(255, 
-                    baseLevel + noise + mouseInfluence + Math.sin(Date.now() * 0.005 + i) * 10
-                ));
-            }
-            
-            // 计算平均音量
-            const average = this.frequencyData.reduce((a, b) => a + b, 0) / this.frequencyData.length;
-            this.voiceAmplitude = average / 255;
-            
-            requestAnimationFrame(updateAudioData);
-        };
-        updateAudioData();
-    }
-    
-    // 记录鼠标轨迹（简化版，仅用于粒子跟随）
-    recordMouseTrail(x, y) {
-        const now = Date.now();
-        this.mouseTrail.push({ x, y, time: now });
-        
-        // 只保留最近3秒的轨迹
-        this.mouseTrail = this.mouseTrail.filter(point => now - point.time < 3000);
-    }
-    
-    // 智能粒子系统
-    initSmartParticleSystem() {
-        this.particleTargets = [];
-        this.particleFollowers = [];
-        
-        // 创建跟随粒子
-        this.createFollowerParticles();
-        
-        // 启动粒子更新循环
-        this.updateSmartParticles();
-    }
-    
-    createFollowerParticles() {
-        const followerCount = this.isMobile ? 3 : 8;
-        
-        for (let i = 0; i < followerCount; i++) {
-            this.particleFollowers.push({
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
-                targetX: 0,
-                targetY: 0,
-                speed: 0.02 + Math.random() * 0.03,
-                element: this.createFollowerElement(i)
-            });
-        }
-    }
-    
-    createFollowerElement(index) {
-        const element = document.createElement('div');
-        element.className = 'fixed w-1 h-1 bg-gradient-radial from-unx-accent to-transparent rounded-full pointer-events-none z-[100] transition-opacity duration-300 opacity-60';
-        element.style.boxShadow = '0 0 10px rgba(255, 107, 107, 0.8)';
-        document.body.appendChild(element);
-        return element;
-    }
-    
-    updateSmartParticles() {
-        const update = () => {
-            const mouseX = (this.mouse.x + 1) * window.innerWidth / 2;
-            const mouseY = (-this.mouse.y + 1) * window.innerHeight / 2;
-            
-            this.particleFollowers.forEach((particle, index) => {
-                // 计算目标位置（鼠标周围的圆形轨道）
-                const angle = (Date.now() * 0.001 + index * (Math.PI * 2 / this.particleFollowers.length)) % (Math.PI * 2);
-                const radius = 50 + this.voiceAmplitude * 30;
-                
-                particle.targetX = mouseX + Math.cos(angle) * radius;
-                particle.targetY = mouseY + Math.sin(angle) * radius;
-                
-                // 平滑移动
-                particle.x += (particle.targetX - particle.x) * particle.speed;
-                particle.y += (particle.targetY - particle.y) * particle.speed;
-                
-                // 更新元素位置
-                particle.element.style.left = particle.x + 'px';
-                particle.element.style.top = particle.y + 'px';
-                
-                // 根据速度调整透明度
-                const velocity = Math.sqrt(
-                    Math.pow(particle.targetX - particle.x, 2) + 
-                    Math.pow(particle.targetY - particle.y, 2)
-                );
-                particle.element.style.opacity = Math.min(0.8, 0.3 + velocity * 0.01);
-            });
-            
-            requestAnimationFrame(update);
-        };
-        update();
-    }
-    
-    // 扫描线效果
-    initScanLineEffect() {
-        this.createScanLines();
-        this.animateScanLines();
-    }
-    
-    createScanLines() {
-        const scanLineCount = this.isMobile ? 2 : 4;
-        
-        for (let i = 0; i < scanLineCount; i++) {
-            const scanLine = document.createElement('div');
-            scanLine.className = 'fixed left-0 w-full h-0.5 pointer-events-none z-50 opacity-0';
-            scanLine.style.background = 'linear-gradient(90deg, transparent 0%, rgba(255, 107, 107, 0.8) 50%, transparent 100%)';
-            scanLine.style.boxShadow = '0 0 20px rgba(255, 107, 107, 0.6)';
-            
-            this.scanLines.push({
-                element: scanLine,
-                direction: Math.random() > 0.5 ? 1 : -1,
-                speed: 0.5 + Math.random() * 1,
-                delay: i * 2000
-            });
-            
-            document.body.appendChild(scanLine);
-        }
-    }
-    
-    animateScanLines() {
-        this.scanLines.forEach((scanLine, index) => {
-            const animate = () => {
-                const duration = 3000 + Math.random() * 2000;
-                const startY = scanLine.direction > 0 ? -10 : window.innerHeight + 10;
-                const endY = scanLine.direction > 0 ? window.innerHeight + 10 : -10;
-                
-                gsap.set(scanLine.element, { 
-                    top: startY + 'px',
-                    opacity: 0 
-                });
-                
-                gsap.timeline()
-                    .to(scanLine.element, {
-                        opacity: 0.6,
-                        duration: 0.5,
-                        ease: "power2.out"
-                    })
-                    .to(scanLine.element, {
-                        top: endY + 'px',
-                        duration: duration / 1000,
-                        ease: "none"
-                    }, 0)
-                    .to(scanLine.element, {
-                        opacity: 0,
-                        duration: 0.5,
-                        ease: "power2.in"
-                    }, "-=0.5")
-                    .call(() => {
-                        // 延迟后再次启动
-                        setTimeout(animate, 5000 + Math.random() * 10000);
-                    });
-            };
-            
-            // 初始延迟
-            setTimeout(animate, scanLine.delay);
+        lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePos, 3));
+        const lineMat = new THREE.LineBasicMaterial({
+            color: 0x3b82f6,
+            transparent: true,
+            opacity: 0.1
         });
-    }
-    
-    // 能量连线系统
-    initEnergyConnections() {
-        this.connectionCanvas = document.createElement('canvas');
-        this.connectionCanvas.className = 'fixed top-0 left-0 w-full h-full pointer-events-none z-45 connection-canvas';
-        
-        this.connectionCtx = this.connectionCanvas.getContext('2d');
-        this.resizeConnectionCanvas();
-        
-        document.body.appendChild(this.connectionCanvas);
-        
-        // 启动连线绘制
-        this.drawConnections();
-        
-        // 监听窗口大小变化
-        window.addEventListener('resize', () => this.resizeConnectionCanvas());
-    }
-    
-    resizeConnectionCanvas() {
-        this.connectionCanvas.width = window.innerWidth;
-        this.connectionCanvas.height = window.innerHeight;
-    }
-    
-    drawConnections() {
-        const draw = () => {
-            this.connectionCtx.clearRect(0, 0, this.connectionCanvas.width, this.connectionCanvas.height);
-            
-            const mouseX = (this.mouse.x + 1) * window.innerWidth / 2;
-            const mouseY = (-this.mouse.y + 1) * window.innerHeight / 2;
-            
-            // 绘制鼠标到随机粒子的连线
-            this.particleFollowers.forEach((particle, index) => {
-                const distance = Math.sqrt(
-                    Math.pow(mouseX - particle.x, 2) + 
-                    Math.pow(mouseY - particle.y, 2)
-                );
-                
-                if (distance < 200) { // 只在近距离内连接
-                    const opacity = (1 - distance / 200) * 0.3 * this.energyLevel;
-                    
-                    this.connectionCtx.beginPath();
-                    this.connectionCtx.strokeStyle = `rgba(255, 107, 107, ${opacity})`;
-                    this.connectionCtx.lineWidth = 1;
-                    this.connectionCtx.moveTo(mouseX, mouseY);
-                    this.connectionCtx.lineTo(particle.x, particle.y);
-                    this.connectionCtx.stroke();
-                    
-                    // 添加脑电波效果
-                    if (Math.random() < 0.1) {
-                        this.drawLightningBolt(mouseX, mouseY, particle.x, particle.y, opacity);
-                    }
-                }
-            });
-            
-            // 能量等级自然衰减
-            this.energyLevel *= 0.995;
-            
-            requestAnimationFrame(draw);
-        };
-        draw();
-    }
-    
-    drawLightningBolt(startX, startY, endX, endY, opacity) {
-        const segments = 8;
-        const roughness = 0.3;
-        
-        this.connectionCtx.beginPath();
-        this.connectionCtx.strokeStyle = `rgba(255, 255, 255, ${opacity * 2})`;
-        this.connectionCtx.lineWidth = 2;
-        this.connectionCtx.moveTo(startX, startY);
-        
-        for (let i = 1; i < segments; i++) {
-            const t = i / segments;
-            const x = startX + (endX - startX) * t;
-            const y = startY + (endY - startY) * t;
-            
-            // 添加随机偏移
-            const offsetX = (Math.random() - 0.5) * roughness * 50;
-            const offsetY = (Math.random() - 0.5) * roughness * 50;
-            
-            this.connectionCtx.lineTo(x + offsetX, y + offsetY);
-        }
-        
-        this.connectionCtx.lineTo(endX, endY);
-        this.connectionCtx.stroke();
-    }
-    
-    // 时间扰曲效果
-    initTimeWarpEffect() {
-        // 监听按键事件
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Shift' && !this.isTimeWarpActive) {
-                this.activateTimeWarp();
-            }
-        });
-        
-        document.addEventListener('keyup', (e) => {
-            if (e.key === 'Shift' && this.isTimeWarpActive) {
-                this.deactivateTimeWarp();
-            }
-        });
-    }
-    
-    activateTimeWarp() {
-        this.isTimeWarpActive = true;
-        
-        // 减慢动画
-        gsap.globalTimeline.timeScale(0.3);
-        
-        // 视觉效果
-        gsap.to(document.body, {
-            filter: `${this.getThemeFilter()} contrast(1.2) saturate(1.3) hue-rotate(10deg)`,
-            duration: 0.5,
-            ease: "power2.out"
-        });
-        
-        // 显示时间扰曲指示
-        console.log('⏱️ 时间扰曲激活');
-    }
-    
-    deactivateTimeWarp() {
-        this.isTimeWarpActive = false;
-        
-        // 恢复正常速度
-        gsap.globalTimeline.timeScale(1);
-        
-        // 恢复视觉效果
-        gsap.to(document.body, {
-            filter: this.getThemeFilter(),
-            duration: 0.8,
-            ease: "power2.inOut"
-        });
-        
-        console.log('⏱️ 时间扰曲停止');
-    }
-    
-    temporaryTimeWarp(duration) {
-        if (this.isTimeWarpActive) return;
-        
-        this.activateTimeWarp();
-        setTimeout(() => {
-            this.deactivateTimeWarp();
-        }, duration);
-    }
-    
-    // 虚拟键盘系统
-    initVirtualKeyboard() {
-        if (this.isMobile) {
-            this.createVirtualKeyboard();
-        }
-    }
-    
-    createVirtualKeyboard() {
-        this.virtualKeyboard = document.createElement('div');
-        this.virtualKeyboard.className = 'virtual-keyboard fixed bottom-[100px] right-5 bg-black/80 backdrop-blur-lg border border-unx-accent/30 rounded-2xl p-4 z-[100] opacity-0 translate-y-5 transition-all duration-300 font-jetbrains';
-        
-        const keys = [
-            { label: '主题', key: 'ESC', action: () => this.toggleTheme() },
-            { label: '能量', key: 'SPC', action: () => this.triggerEnergyBurst() },
-            { label: '帮助', key: 'H', action: () => this.toggleHelp() },
-            { label: '重置', key: 'R', action: () => this.resetExperience() }
-        ];
-        
-        keys.forEach(keyInfo => {
-            const keyButton = document.createElement('button');
-            keyButton.className = 'block w-full my-1.5 px-3 py-2 bg-unx-accent/10 border border-unx-accent/30 rounded-lg text-unx-accent text-xs font-inherit cursor-pointer transition-all duration-200';
-            
-            keyButton.innerHTML = `
-                <div class="font-bold">${keyInfo.label}</div>
-                <div class="text-[10px] opacity-70">${keyInfo.key}</div>
-            `;
-            
-            keyButton.addEventListener('click', keyInfo.action);
-            
-            keyButton.addEventListener('mouseenter', () => {
-                keyButton.className = keyButton.className.replace('bg-unx-accent/10', 'bg-unx-accent/20');
-                keyButton.style.transform = 'scale(1.05)';
-            });
-            
-            keyButton.addEventListener('mouseleave', () => {
-                keyButton.className = keyButton.className.replace('bg-unx-accent/20', 'bg-unx-accent/10');
-                keyButton.style.transform = 'scale(1)';
-            });
-            
-            this.virtualKeyboard.appendChild(keyButton);
-        });
-        
-        document.body.appendChild(this.virtualKeyboard);
-        
-        // 显示虚拟键盘
-        setTimeout(() => {
-            this.virtualKeyboard.classList.remove('opacity-0', 'translate-y-5');
-            this.virtualKeyboard.classList.add('opacity-80', 'translate-y-0');
-        }, 2000);
-        
-        // 5秒后自动隐藏
-        setTimeout(() => {
-            this.virtualKeyboard.classList.remove('opacity-80', 'translate-y-0');
-            this.virtualKeyboard.classList.add('opacity-0', 'translate-y-5');
-        }, 7000);
-    }
-    
-    // 语音交互初始化
-    async initVoiceInteraction() {
-        try {
-            // 请求麦克风权限（可选）
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                this.setupVoiceAnalysis(stream);
-            }
-        } catch (error) {
-            console.log('语音交互不可用:', error.message);
-            // 使用模拟数据
-            this.useSimulatedVoice();
-        }
-    }
-    
-    setupVoiceAnalysis(stream) {
-        if (!this.audioContext) return;
-        
-        const source = this.audioContext.createMediaStreamSource(stream);
-        source.connect(this.analyser);
-        
-        const updateVoiceData = () => {
-            this.analyser.getByteFrequencyData(this.frequencyData);
-            
-            // 计算平均音量
-            const average = this.frequencyData.reduce((a, b) => a + b, 0) / this.frequencyData.length;
-            this.voiceAmplitude = average / 255;
-            
-            // 根据音量调整粒子效果
-            if (this.particles && this.voiceAmplitude > 0.1) {
-                const scale = 1 + this.voiceAmplitude * 0.2;
-                gsap.to(this.particles.scale, {
-                    x: scale,
-                    y: scale,
-                    z: scale,
-                    duration: 0.1,
-                    ease: "power2.out"
-                });
-            }
-            
-            requestAnimationFrame(updateVoiceData);
-        };
-        
-        updateVoiceData();
-        console.log('🎤 语音交互已启用');
-    }
-    
-    useSimulatedVoice() {
-        // 使用模拟音量数据
-        const updateSimulatedVoice = () => {
-            // 模拟随机音量变化
-            this.voiceAmplitude = Math.max(0, this.voiceAmplitude + (Math.random() - 0.5) * 0.05);
-            this.voiceAmplitude = Math.min(0.3, this.voiceAmplitude);
-            
-            requestAnimationFrame(updateSimulatedVoice);
-        };
-        updateSimulatedVoice();
-    }
-    
-    // 额外的创意效果
-    createLightningEffect() {
-        // 闪电效果实现
-        const lightning = document.createElement('div');
-        lightning.className = 'lightning-flash fixed top-0 left-0 w-full h-full pointer-events-none z-[999] opacity-0';
-        
-        document.body.appendChild(lightning);
-        
-        gsap.timeline()
-            .to(lightning, {
-                opacity: 0.8,
-                duration: 0.05,
-                ease: "power2.out"
-            })
-            .to(lightning, {
-                opacity: 0,
-                duration: 0.3,
-                ease: "power2.in"
-            })
-            .call(() => lightning.remove());
-        
-        // 声音效果（可选）
-        this.playThunderSound();
-    }
-    
-    createWaveEffect() {
-        // 波浪效果实现
-        const waveCount = 5;
-        
-        for (let i = 0; i < waveCount; i++) {
-            setTimeout(() => {
-                this.createRippleEffect(
-                    Math.random() * window.innerWidth,
-                    Math.random() * window.innerHeight,
-                    'normal'
-                );
-            }, i * 200);
-        }
-    }
-    
-    cycleTheme() {
-        // 快速切换主题（用于圈形手势）
-        const themes = ['default', 'blue', 'green', 'purple', 'orange'];
-        const currentIndex = themes.indexOf(this.currentTheme);
-        
-        for (let i = 0; i < themes.length; i++) {
-            setTimeout(() => {
-                const nextIndex = (currentIndex + i + 1) % themes.length;
-                this.currentTheme = themes[nextIndex];
-                
-                gsap.to(document.body, {
-                    filter: this.getThemeFilter(),
-                    duration: 0.3,
-                    ease: "power2.inOut"
-                });
-            }, i * 300);
-        }
-    }
-    
-    playThunderSound() {
-        // 使用Web Audio API创建简单的声音效果
-        if (this.audioContext) {
-            const oscillator = this.audioContext.createOscillator();
-            const gainNode = this.audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(this.audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(50, this.audioContext.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(25, this.audioContext.currentTime + 0.3);
-            
-            gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
-            
-            oscillator.start(this.audioContext.currentTime);
-            oscillator.stop(this.audioContext.currentTime + 0.3);
-        }
-    }
-    initInteractions() {
-        console.log('🎮 初始化交互系统...');
-        
-        // 超级酷炫Logo交互
-        const logoContainer = document.getElementById('logo-container');
-        const logoSphere = document.getElementById('logo-sphere');
-        
-        if (logoContainer && logoSphere) {
-            // 鼠标跟踪3D旋转
-            logoContainer.addEventListener('mousemove', (e) => {
-                this.handleLogoMouseMove(e, logoSphere);
-            });
-            
-            // 鼠标进入增强效果
-            logoContainer.addEventListener('mouseenter', () => {
-                this.enhanceLogoGlow(logoSphere);
-            });
-            
-            // 鼠标离开恢复
-            logoContainer.addEventListener('mouseleave', () => {
-                this.resetLogoGlow(logoSphere);
-            });
-            
-            // 点击触发能量爆发
-            logoContainer.addEventListener('click', () => {
-                this.triggerLogoEnergyBurst();
-            });
-        }
-        
-        // 点击爆炸效果
-        document.addEventListener('click', (e) => {
-            this.createRippleEffect(e.clientX, e.clientY);
-        });
-        
-        // 移动端触摸优化
-        if (this.isMobile) {
-            this.initTouchInteractions();
-        }
-        
-        console.log('✅ 交互系统初始化完成');
-    }
-    
-    // 鼠标跟踪3D旋转效果 - 简化版
-    handleLogoMouseMove(e, logoSphere) {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        
-        const deltaX = (e.clientX - centerX) / rect.width;
-        const deltaY = (e.clientY - centerY) / rect.height;
-        
-        const rotateX = deltaY * -10; // 减少旋转幅度
-        const rotateY = deltaX * 10;
-        
-        gsap.to(logoSphere, {
-            rotationX: rotateX,
-            rotationY: rotateY,
-            duration: 0.3,
-            ease: "power2.out"
-        });
-    }
-    
-    // 简化的Logo悬停效果
-    enhanceLogoGlow(logoSphere) {
-        gsap.to(logoSphere, {
-            scale: 1.05,
-            duration: 0.3,
-            ease: "power2.out"
-        });
-    }
-    
-    // 重置Logo状态
-    resetLogoGlow(logoSphere) {
-        gsap.to(logoSphere, {
-            scale: 1,
-            rotationX: 0,
-            rotationY: 0,
-            duration: 0.4,
-            ease: "power2.out"
-        });
-    }
-    
-    // 简化的Logo点击效果
-    triggerLogoEnergyBurst() {
-        const logoSphere = document.getElementById('logo-sphere');
-        
-        if (logoSphere) {
-            // 简单的缩放动画
-            gsap.timeline()
-                .to(logoSphere, {
-                    scale: 1.1,
-                    duration: 0.15,
-                    ease: "power2.out"
-                })
-                .to(logoSphere, {
-                    scale: 1,
-                    duration: 0.3,
-                    ease: "elastic.out(1, 0.5)"
-                });
-        }
-        
-        // 触发简单的涟漪效果
-        this.createRippleEffect(window.innerWidth / 2, window.innerHeight / 2, 'small');
-    }
-    
-    createRippleEffect(x, y, size = 'normal') {
-        const ripple = document.createElement('div');
-        
-        // 根据尺寸设置不同的样式
-        const sizes = {
-            small: { initial: 10, final: 100, border: 1 },
-            normal: { initial: 20, final: 200, border: 2 },
-            large: { initial: 30, final: 300, border: 3 }
-        };
-        
-        const sizeConfig = sizes[size] || sizes.normal;
-        
-        ripple.className = 'fixed rounded-full pointer-events-none z-[9999] transform -translate-x-1/2 -translate-y-1/2';
-        ripple.style.left = x + 'px';
-        ripple.style.top = y + 'px';
-        ripple.style.width = sizeConfig.initial + 'px';
-        ripple.style.height = sizeConfig.initial + 'px';
-        ripple.style.border = `${sizeConfig.border}px solid rgba(255, 107, 107, 0.6)`;
-        
-        document.body.appendChild(ripple);
-        
-        gsap.to(ripple, {
-            width: sizeConfig.final,
-            height: sizeConfig.final,
-            opacity: 0,
-            duration: size === 'large' ? 1.5 : 1,
-            ease: "power2.out",
-            onComplete: () => ripple.remove()
-        });
-    }
-    
-    // 简化的移动端触摸交互
-    initTouchInteractions() {
-        console.log('📱 初始化移动端交互...');
-        
-        let touchStartTime = 0;
-        let lastTap = 0;
-        
-        // 触摸开始
-        document.addEventListener('touchstart', (e) => {
-            touchStartTime = Date.now();
-        }, { passive: true });
-        
-        // 触摸结束
-        document.addEventListener('touchend', (e) => {
-            const touchDuration = Date.now() - touchStartTime;
-            const currentTime = Date.now();
-            const tapLength = currentTime - lastTap;
-            
-            if (touchDuration < 200) { // 快速点击
-                const touch = e.changedTouches[0];
-                if (touch) {
-                    this.createRippleEffect(touch.clientX, touch.clientY, 'small');
-                }
-            }
-            
-            // 双击检测
-            if (tapLength < 500 && tapLength > 0) {
-                e.preventDefault();
-                this.triggerEnergyBurst();
-            }
-            
-            lastTap = currentTime;
-        }, { passive: false });
-        
-        // 移动端提示优化
-        this.optimizeMobileHints();
-        
-        console.log('✅ 移动端交互初始化完成');
+        this.connections = new THREE.LineSegments(lineGeo, lineMat);
+        this.scene.add(this.connections);
     }
 
-    
-    optimizeMobileHints() {
-        const mobileHint = document.getElementById('mobile-hint');
-        if (mobileHint && this.isMobile) {
-            // 简化的提示内容
-            const hintContent = mobileHint.querySelector('.text-xs:last-child');
-            if (hintContent) {
-                hintContent.innerHTML = `点击屏幕体验特效 · 双击触发能量爆发`;
-            }
-            
-            // 简化的动画序列
-            gsap.timeline({ delay: 2 })
-                .fromTo(mobileHint, 
-                    { y: 30, opacity: 0 },
-                    { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }
-                )
-                .to(mobileHint, 
-                    { opacity: 0, y: -15, duration: 0.4, ease: "power2.inOut" },
-                    "+=3"
-                )
-                .call(() => {
-                    mobileHint.style.display = 'none';
-                });
+    createAmbientParticles() {
+        const geometry = new THREE.BufferGeometry();
+        const count = 1000;
+        const positions = new Float32Array(count * 3);
+
+        for (let i = 0; i < count; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 100;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
         }
-    }
-    
-    // === 键盘控制系统 ===
-    initKeyboardControls() {
-        console.log('🎹 初始化键盘控制...');
-        
-        document.addEventListener('keydown', (e) => {
-            // 避免在输入框中触发快捷键
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                return;
-            }
-            
-            switch (e.key.toLowerCase()) {
-                case 'escape':
-                    e.preventDefault();
-                    this.toggleTheme();
-                    break;
-                case ' ':
-                    e.preventDefault();
-                    this.triggerEnergyBurst();
-                    break;
-                case 'f':
-                    e.preventDefault();
-                    this.toggleFullscreen();
-                    break;
-                case 'h':
-                    e.preventDefault();
-                    this.toggleHelp();
-                    break;
-                case 'r':
-                    e.preventDefault();
-                    this.resetExperience();
-                    break;
-                case 'l':
-                    e.preventDefault();
-                    this.triggerLightningGesture();
-                    break;
-                case 'w':
-                    e.preventDefault();
-                    this.triggerWaveGesture();
-                    break;
-                case 'c':
-                    e.preventDefault();
-                    this.triggerCircleGesture();
-                    break;
-                default:
-                    break;
-            }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const material = new THREE.PointsMaterial({
+            size: 0.1,
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.3
         });
-        
-        // 为键盘用户添加焦点支持
-        this.addKeyboardNavigation();
-        
-        console.log('✅ 键盘控制初始化完成');
+
+        this.starfield = new THREE.Points(geometry, material);
+        this.scene.add(this.starfield);
     }
-    
-    // 新增的键盘功能
-    toggleVirtualKeyboard() {
-        if (!this.virtualKeyboard) {
-            return; // 静默处理，不显示提示
-        }
-        
-        const isVisible = this.virtualKeyboard && !this.virtualKeyboard.classList.contains('opacity-0');
-        
-        gsap.to(this.virtualKeyboard, {
-            opacity: isVisible ? 0 : 0.8,
-            y: isVisible ? 20 : 0,
-            duration: 0.3,
-            ease: "power2.out"
-        });
-    }
-    
-    // 添加帮助系统
-    initHelpSystem() {
-        const helpPanel = document.getElementById('keyboard-hints');
-        if (helpPanel && !this.isMobile) {
-            // 初始时显示3秒后自动隐藏
-            setTimeout(() => {
-                gsap.to(helpPanel, {
-                    opacity: 0.8,
-                    duration: 0.5,
-                    ease: "power2.out"
-                });
-                
-                // 3秒后淡出
-                setTimeout(() => {
-                    gsap.to(helpPanel, {
-                        opacity: 0,
-                        duration: 0.5,
-                        ease: "power2.inOut"
-                    });
-                }, 3000);
-            }, 1000);
-        }
-    }
-    
-    addKeyboardNavigation() {
-        const focusableElements = [
-            document.getElementById('logo-container'),
-            document.querySelector('a[href*="github"]')
-        ].filter(Boolean);
-        
-        focusableElements.forEach((element, index) => {
-            element.addEventListener('keydown', (e) => {
-                if (e.key === 'Tab') {
-                    // Tab 导航支持已由浏览器原生支持
-                } else if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    element.click();
-                }
-            });
-        });
-    }
-    
-    toggleHelp() {
-        const helpPanel = document.getElementById('keyboard-hints');
-        if (!helpPanel || this.isMobile) return;
-        
-        this.helpVisible = !this.helpVisible;
-        
-        gsap.to(helpPanel, {
-            opacity: this.helpVisible ? 0.9 : 0,
-            transform: this.helpVisible ? 'translateY(0)' : 'translateY(-10px)',
-            duration: 0.3,
-            ease: "power2.out"
-        });
-    }
-    
-    resetExperience() {
-        // 重置主题
-        this.currentTheme = 'default';
-        gsap.set(document.body, { filter: 'none' });
-        
-        // 重置粒子系统
-        if (this.particles) {
-            this.particles.material.uniforms.time.value = 0;
-        }
-        
-        // 重置logo状态
-        const logoSphere = document.getElementById('logo-sphere');
-        if (logoSphere) {
-            gsap.set(logoSphere, {
-                scale: 1,
-                rotation: 0,
-                rotationX: 0,
-                rotationY: 0
-            });
-        }
-        
-        console.log('✅ 体验已重置');
-    }
-    
-    toggleTheme() {
-        const themes = {
-            default: 'none',
-            blue: 'hue-rotate(240deg) saturate(1.2)',
-            green: 'hue-rotate(120deg) saturate(1.1)',
-            purple: 'hue-rotate(280deg) saturate(1.3)',
-            orange: 'hue-rotate(30deg) saturate(1.2)'
-        };
-        
-        const themeKeys = Object.keys(themes);
-        const currentIndex = themeKeys.indexOf(this.currentTheme);
-        const nextIndex = (currentIndex + 1) % themeKeys.length;
-        this.currentTheme = themeKeys[nextIndex];
-        
-        // 优雅的主题切换动画
-        gsap.to(document.body, {
-            filter: themes[this.currentTheme],
-            duration: 1.2,
-            ease: "power2.inOut"
-        });
-        
-        console.log(`🎨 切换主题: ${this.currentTheme}`);
-    }
-    
-    triggerEnergyBurst() {
-        // 屏幕中央能量爆发
-        this.createRippleEffect(window.innerWidth / 2, window.innerHeight / 2, 'large');
-        
-        // 粒子系统增强
-        if (this.particles) {
-            gsap.to(this.particles.material.uniforms.time, {
-                value: this.particles.material.uniforms.time.value + 20,
-                duration: 2,
-                ease: "power2.out"
-            });
-        }
-        
-        // 优化的闪烁效果 - 降低强度
-        gsap.timeline()
-            .to(document.body, {
-                filter: this.currentTheme === 'default' ? 
-                    'brightness(1.05) contrast(1.1)' : 
-                    `${this.getThemeFilter()} brightness(1.05) contrast(1.1)`,
-                duration: 0.1,
-                ease: "power2.out"
-            })
-            .to(document.body, {
-                filter: this.getThemeFilter(),
-                duration: 0.3,
-                ease: "power2.inOut"
-            });
-        
-        console.log('⚡ 能量爆发触发');
-    }
-    
-    getThemeFilter() {
-        const themes = {
-            default: 'none',
-            blue: 'hue-rotate(240deg) saturate(1.2)',
-            green: 'hue-rotate(120deg) saturate(1.1)',
-            purple: 'hue-rotate(280deg) saturate(1.3)',
-            orange: 'hue-rotate(30deg) saturate(1.2)'
-        };
-        return themes[this.currentTheme] || 'none';
-    }
-    
-    // === 手势动画方法 ===
-    triggerLightningGesture() {
-        console.log('⚡ 闪电手势触发');
-        
-        // 创建闪电效果
-        this.createLightningEffect();
-        
-        // 增强粒子能量
-        this.energyLevel = 1;
-        
-        // 临时时间扭曲
-        this.temporaryTimeWarp(1000);
-    }
-    
-    triggerWaveGesture() {
-        console.log('🌊 波浪手势触发');
-        
-        // 创建波浪效果
-        this.createWaveEffect();
-        
-        // 多重涟漪效果
-        for (let i = 0; i < 8; i++) {
-            setTimeout(() => {
-                this.createRippleEffect(
-                    Math.random() * window.innerWidth,
-                    Math.random() * window.innerHeight,
-                    'medium'
-                );
-            }, i * 100);
-        }
-    }
-    
-    triggerCircleGesture() {
-        console.log('⭕ 圆圈手势触发');
-        
-        // 快速主题循环
-        this.cycleTheme();
-        
-        // 创建圆形扩散效果
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
-        
-        for (let i = 0; i < 5; i++) {
-            setTimeout(() => {
-                this.createRippleEffect(centerX, centerY, 'large');
-            }, i * 300);
-        }
-    }
-    
-    toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(console.error);
-        } else {
-            document.exitFullscreen();
-        }
-    }
-    
-    // === 窗口调整 ===
-    handleResize() {
-        if (!this.camera || !this.renderer) return;
-        
+
+    onWindowResize() {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        
-        // 更新着色器分辨率
+    }
+
+    onMouseMove(event) {
+        const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+        const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        gsap.to(this.particles.rotation, {
+            x: mouseY * 0.2,
+            y: mouseX * 0.2,
+            duration: 2,
+            ease: "power2.out"
+        });
+
+        gsap.to(this.camera.position, {
+            x: mouseX * 2,
+            y: mouseY * 2,
+            duration: 2,
+            ease: "power2.out"
+        });
+    }
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+
+        const time = Date.now() * 0.001;
+
         if (this.particles) {
-            this.particles.material.uniforms.resolution.value.set(
-                window.innerWidth,
-                window.innerHeight
-            );
+            this.particles.rotation.y += 0.001;
+            this.particles.rotation.z += 0.0005;
+
+            const scale = 1 + Math.sin(time) * 0.05;
+            this.particles.scale.set(scale, scale, scale);
+
+            if (this.connections) {
+                this.connections.rotation.y += 0.001;
+                this.connections.rotation.z += 0.0005;
+                this.connections.scale.set(scale, scale, scale);
+            }
+        }
+
+        if (this.starfield) {
+            this.starfield.rotation.y -= 0.0005;
+        }
+
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    // === UI System ===
+    initUI() {
+        const navbar = document.querySelector('.navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        const toggle = document.querySelector('.nav-toggle');
+        const links = document.querySelector('.nav-links');
+
+        if (toggle) {
+            toggle.addEventListener('click', () => {
+                links.style.display = links.style.display === 'flex' ? 'none' : 'flex';
+                if (links.style.display === 'flex') {
+                    links.style.position = 'absolute';
+                    links.style.top = '80px';
+                    links.style.left = '0';
+                    links.style.width = '100%';
+                    links.style.flexDirection = 'column';
+                    links.style.background = '#050505';
+                    links.style.padding = '2rem';
+                    links.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+                }
+            });
         }
     }
-    
-    // === 渲染循环 ===
-    startRenderLoop() {
-        const render = (time) => {
-            if (this.particles) {
-                this.particles.material.uniforms.time.value = time;
-                this.particles.material.uniforms.mouse.value.copy(this.mouse);
-                
-                // 微妙的旋转
-                this.particles.rotation.y += 0.001;
-            }
-            
-            this.renderer.render(this.scene, this.camera);
-            requestAnimationFrame(render);
-        };
-        
-        render(0);
+
+    // === Animation System ===
+    initAnimations() {
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Scramble Text Effect
+        const scrambleElements = document.querySelectorAll('[data-scramble]');
+        scrambleElements.forEach(el => {
+            new ScrambleText(el);
+        });
+
+        const sections = document.querySelectorAll('.section');
+        sections.forEach(section => {
+            gsap.from(section.children, {
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                },
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                stagger: 0.2,
+                ease: "power3.out"
+            });
+        });
+    }
+
+    startEntranceAnimations() {
+        // Additional logic if needed
     }
 }
 
-// 初始化应用
-document.addEventListener('DOMContentLoaded', () => {
-    new UNXAIExperience();
-});
+/**
+ * GitHub Service
+ * Handles data fetching with fallback
+ */
+class GitHubService {
+    constructor(terminal) {
+        this.org = 'unxai';
+        this.terminal = terminal;
+        this.fallbackRepos = [
+            { name: 'monitor-mcp-server', description: 'MCP-based system monitoring server for Mac.', html_url: '#', language: 'Python', stargazers_count: 12 },
+            { name: 'magic-cube-app', description: 'Elasticsearch tool with AI chat.', html_url: '#', language: 'TypeScript', stargazers_count: 45 },
+            { name: 'geonames-service', description: 'Go-based geolocation data service.', html_url: '#', language: 'Go', stargazers_count: 8 },
+            { name: 'Inkwell', description: 'Creative space for digital expression.', html_url: '#', language: 'Vue', stargazers_count: 23 }
+        ];
+        this.fallbackMembers = [
+            { login: 'Alex Chen', avatar_url: 'https://avatars.githubusercontent.com/u/1?v=4', html_url: '#' },
+            { login: 'Sarah Wu', avatar_url: 'https://avatars.githubusercontent.com/u/2?v=4', html_url: '#' }
+        ];
+    }
 
-// 导出为全局变量（可选）
-window.UNXAIExperience = UNXAIExperience;
+    async getRepositories() {
+        try {
+            const response = await fetch(`https://api.github.com/users/${this.org}/repos?sort=updated&per_page=6`);
+            if (!response.ok) throw new Error('API Error');
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            this.terminal.log("Warning: GitHub Uplink Unstable. Using Cached Data.");
+            return this.fallbackRepos;
+        }
+    }
+
+    async getMembers() {
+        try {
+            const response = await fetch(`https://api.github.com/orgs/${this.org}/public_members`);
+            if (!response.ok) throw new Error('API Error');
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            return this.fallbackMembers;
+        }
+    }
+}
+
+/**
+ * System Terminal
+ * Logs messages to the UI
+ */
+class SystemTerminal {
+    constructor() {
+        this.output = document.getElementById('terminal-output');
+    }
+
+    log(message) {
+        if (!this.output) return;
+        const line = document.createElement('div');
+        line.textContent = `> ${message}`;
+        this.output.appendChild(line);
+        this.output.scrollTop = this.output.scrollHeight;
+
+        // Keep only last 5 lines
+        if (this.output.children.length > 5) {
+            this.output.removeChild(this.output.firstChild);
+        }
+    }
+}
+
+/**
+ * Scramble Text Effect
+ * Decodes text like a hacker terminal
+ */
+class ScrambleText {
+    constructor(element) {
+        this.element = element;
+        this.originalText = element.innerText;
+        this.chars = '!<>-_\\/[]{}—=+*^?#________';
+        this.frame = 0;
+        this.queue = [];
+        this.resolve = null;
+
+        this.init();
+    }
+
+    init() {
+        ScrollTrigger.create({
+            trigger: this.element,
+            start: "top 80%",
+            onEnter: () => this.scramble()
+        });
+    }
+
+    setText(newText) {
+        const oldText = this.element.innerText;
+        const length = Math.max(oldText.length, newText.length);
+        const promise = new Promise((resolve) => this.resolve = resolve);
+        this.queue = [];
+
+        for (let i = 0; i < length; i++) {
+            const from = oldText[i] || '';
+            const to = newText[i] || '';
+            const start = Math.floor(Math.random() * 40);
+            const end = start + Math.floor(Math.random() * 40);
+            this.queue.push({ from, to, start, end });
+        }
+
+        cancelAnimationFrame(this.frameRequest);
+        this.frame = 0;
+        this.update();
+        return promise;
+    }
+
+    scramble() {
+        this.setText(this.originalText);
+    }
+
+    update() {
+        let output = '';
+        let complete = 0;
+
+        for (let i = 0, n = this.queue.length; i < n; i++) {
+            let { from, to, start, end, char } = this.queue[i];
+            if (this.frame >= end) {
+                complete++;
+                output += to;
+            } else if (this.frame >= start) {
+                if (!char || Math.random() < 0.28) {
+                    char = this.randomChar();
+                    this.queue[i].char = char;
+                }
+                output += `<span class="dud">${char}</span>`;
+            } else {
+                output += from;
+            }
+        }
+
+        this.element.innerHTML = output;
+
+        if (complete === this.queue.length) {
+            this.resolve();
+        } else {
+            this.frameRequest = requestAnimationFrame(this.update.bind(this));
+            this.frame++;
+        }
+    }
+
+    randomChar() {
+        return this.chars[Math.floor(Math.random() * this.chars.length)];
+    }
+}
+
+/**
+ * Pattern Generator
+ * Creates deterministic abstract art from strings
+ */
+class PatternGenerator {
+    static generate(seedString) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const width = 400;
+        const height = 250;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Deterministic Random
+        let seed = 0;
+        for (let i = 0; i < seedString.length; i++) {
+            seed = ((seed << 5) - seed) + seedString.charCodeAt(i);
+            seed |= 0;
+        }
+
+        const random = () => {
+            const x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        };
+
+        // Base Background
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, '#0a0a0a');
+        gradient.addColorStop(1, '#1a1a1a');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+
+        // Select Pattern Style
+        const style = Math.floor(random() * 3);
+
+        ctx.globalCompositeOperation = 'screen';
+
+        if (style === 0) {
+            // Neural Nodes
+            for (let i = 0; i < 15; i++) {
+                const x = random() * width;
+                const y = random() * height;
+                const r = random() * 30 + 10;
+
+                const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+                grad.addColorStop(0, `rgba(${Math.floor(random() * 100)}, ${Math.floor(random() * 100 + 100)}, 255, 0.4)`);
+                grad.addColorStop(1, 'transparent');
+
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        } else if (style === 1) {
+            // Digital Grid
+            ctx.strokeStyle = `rgba(59, 130, 246, 0.1)`;
+            ctx.lineWidth = 1;
+
+            const step = 20 + Math.floor(random() * 20);
+
+            for (let x = 0; x < width; x += step) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+
+            for (let y = 0; y < height; y += step) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            // Glowing Intersections
+            for (let i = 0; i < 10; i++) {
+                const x = Math.floor(random() * (width / step)) * step;
+                const y = Math.floor(random() * (height / step)) * step;
+
+                ctx.fillStyle = '#3b82f6';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#3b82f6';
+                ctx.fillRect(x - 2, y - 2, 4, 4);
+                ctx.shadowBlur = 0;
+            }
+        } else {
+            // Data Flow
+            for (let i = 0; i < 20; i++) {
+                ctx.strokeStyle = `rgba(${Math.floor(random() * 50 + 50)}, ${Math.floor(random() * 100 + 155)}, 255, ${random() * 0.2})`;
+                ctx.lineWidth = random() * 2;
+
+                ctx.beginPath();
+                ctx.moveTo(0, random() * height);
+                ctx.bezierCurveTo(
+                    width * 0.3, random() * height,
+                    width * 0.7, random() * height,
+                    width, random() * height
+                );
+                ctx.stroke();
+            }
+        }
+
+        // Add Noise Texture
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const noise = (Math.random() - 0.5) * 10;
+            data[i] += noise;
+            data[i + 1] += noise;
+            data[i + 2] += noise;
+        }
+        ctx.putImageData(imageData, 0, 0);
+
+        return canvas.toDataURL();
+    }
+}
+
+// Initialize
+window.addEventListener('DOMContentLoaded', () => {
+    new UNXAIApp();
+});
