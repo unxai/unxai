@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#050505">
     <meta name="description"
-        content="UNXAI - Exploring the infinite possibilities of AI, embracing the unknown future of technology">
+        content="UNXAI - Exploring the unlimited possibilities of AI, embracing the unknown future of technology">
     <meta name="keywords" content="UNXAI, AI, Artificial Intelligence, Innovation, Open Source">
 
-    <title>UNXAI | Unknown Infinite</title>
+    <title>UNXAI | Unknown Unlimited</title>
 
     <link rel="icon" type="image/png" href="./assets/logo.png">
 
@@ -82,11 +82,11 @@
                     <img src="./assets/logo.png" alt="UNXAI Logo" class="hero-logo-img">
                 </div>
                 <h1 class="hero-title">
-                    <span class="reveal-text highlight" data-scramble>Unknown · Unlimited</span>
+                    <span class="reveal-text text-highlight" data-scramble>Unknown · Unlimited</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Exploring the mysteries of the unknown and infinite possibilities in the vast boundary of artificial
-                    intelligence.
+                    Exploring the mysteries of the unknown and unlimited possibilities in the vast boundary of
+                    artificial intelligence.
                 </p>
                 <div class="hero-actions">
                     <a href="#projects" class="btn btn-primary">Explore Projects</a>
@@ -106,26 +106,48 @@
             <div class="container">
                 <div class="section-header">
                     <h2 class="section-title" data-scramble>Our Vision</h2>
-                    <p class="section-subtitle">Explore · Create · Evolve</p>
+                    <p class="section-subtitle">Navigating the Uncharted</p>
                 </div>
                 <div class="about-grid">
                     <div class="about-card glass-card">
-                        <div class="card-icon">🚀</div>
-                        <h3>Extreme Innovation</h3>
-                        <p>Breaking conventional thinking to explore the boundaries of AI applications and create
-                            unprecedented value.</p>
+                        <div class="card-icon-minimal">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 16v-4"></path>
+                                <path d="M12 8h.01"></path>
+                            </svg>
+                        </div>
+                        <h3>The Unknown</h3>
+                        <p>Venturing into the deep neural pathways where logic meets intuition.</p>
                     </div>
                     <div class="about-card glass-card">
-                        <div class="card-icon">🌐</div>
-                        <h3>Open Source Spirit</h3>
-                        <p>Embracing the open source community to share technical achievements and build a smarter
-                            future together.</p>
+                        <div class="card-icon-minimal">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path
+                                    d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                                </path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                        </div>
+                        <h3>The Synthesis</h3>
+                        <p>Bridging the gap between biological constraints and digital infinity.</p>
                     </div>
                     <div class="about-card glass-card">
-                        <div class="card-icon">⚡</div>
-                        <h3>Agile Development</h3>
-                        <p>Rapid iteration and continuous optimization to turn ideas into reality at the speed of
-                            thought.</p>
+                        <div class="card-icon-minimal">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M2 12h20"></path>
+                                <path
+                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                                </path>
+                            </svg>
+                        </div>
+                        <h3>The Horizon</h3>
+                        <p>Approaching the edge where defined reality blurs into possibility.</p>
                     </div>
                 </div>
             </div>
@@ -138,13 +160,25 @@
                     <h2 class="section-title" data-scramble>Featured Projects</h2>
                     <p class="section-subtitle">Our Core Open Source Repositories</p>
                 </div>
-                <div class="projects-grid" id="projects-grid">
-                    <!-- Content will be injected by JS -->
-                    <div class="loading-placeholder">
-                        <div class="pulse-loader"></div>
-                        <span>Scanning Repositories...</span>
+                <div class="projects-carousel-wrapper">
+                    <button class="carousel-btn prev" aria-label="Previous Project">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 18l-6-6 6-6" />
+                        </svg>
+                    </button>
+                    <div class="projects-carousel" id="projects-carousel">
+                        <div class="loading-placeholder">
+                            <div class="pulse-loader"></div>
+                            <span>Loading Featured...</span>
+                        </div>
                     </div>
+                    <button class="carousel-btn next" aria-label="Next Project">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </button>
                 </div>
+                
             </div>
         </section>
 
@@ -155,12 +189,26 @@
                     <h2 class="section-title" data-scramble>The Team</h2>
                     <p class="section-subtitle">Behind the Code</p>
                 </div>
-                <div class="team-grid" id="team-grid">
-                    <!-- Content will be injected by JS -->
-                    <div class="loading-placeholder">
-                        <div class="pulse-loader"></div>
-                        <span>Locating Agents...</span>
+                <div class="team-carousel-wrapper">
+                    <button class="carousel-btn prev" aria-label="Previous Member">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M15 18l-6-6 6-6" />
+                        </svg>
+                    </button>
+                    <div class="team-grid" id="team-grid">
+                        <!-- Content will be injected by JS -->
+                        <div class="loading-placeholder">
+                            <div class="pulse-loader"></div>
+                            <span>Locating Agents...</span>
+                        </div>
                     </div>
+                    <button class="carousel-btn next" aria-label="Next Member">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         </section>
@@ -186,7 +234,7 @@
                     </div>
                 </div>
                 <div class="footer-bottom">
-                    <p>&copy; 2025 UNXAI Organization. All rights reserved. | Explore the Infinite, Embrace the Unknown
+                    <p>&copy; 2025 UNXAI Organization. All rights reserved.
                     </p>
                 </div>
             </div>

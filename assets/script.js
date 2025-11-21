@@ -29,17 +29,17 @@ class UNXAIApp {
 
         let loadValue = 0;
         const interval = setInterval(() => {
-            loadValue += Math.random() * 10;
+            loadValue += Math.random() * 22;
             if (loadValue >= 100) {
                 loadValue = 100;
                 clearInterval(interval);
 
-                gsap.to(progress, { width: '100%', duration: 0.5 });
+                gsap.to(progress, { width: '100%', duration: 0.3 });
                 gsap.to(loader, {
                     opacity: 0,
                     visibility: 'hidden',
-                    delay: 0.5,
-                    duration: 0.8,
+                    delay: 0.3,
+                    duration: 0.6,
                     onComplete: () => {
                         this.startEntranceAnimations();
                         this.terminal.log("Core Systems Online.");
@@ -48,7 +48,7 @@ class UNXAIApp {
             } else {
                 progress.style.width = `${loadValue}%`;
             }
-        }, 100);
+        }, 70);
     }
 
     // === Data System ===
@@ -65,36 +65,30 @@ class UNXAIApp {
     }
 
     renderProjects(projects) {
-        const container = document.getElementById('projects-grid');
-        if (!container) return;
+        const wrapper = document.querySelector('.projects-carousel-wrapper');
+        const container = document.getElementById('projects-carousel');
+        if (!container || !wrapper) return;
 
-        container.innerHTML = ''; // Clear loading state
+        container.innerHTML = '';
 
-        // Sort by stars descending
-        projects.sort((a, b) => b.stargazers_count - a.stargazers_count);
+        const sorted = [...projects].sort((a, b) => b.stargazers_count - a.stargazers_count);
 
-        // Determine featured threshold (top 20%)
-        const featuredThreshold = projects.length > 5 ? Math.floor(projects.length * 0.2) : 0;
-
-        projects.forEach((repo, index) => {
+        sorted.forEach((repo, index) => {
             const card = document.createElement('article');
-            const isFeatured = index < featuredThreshold;
-
-            card.className = `project-card glass-card ${isFeatured ? 'featured' : ''}`;
-            card.style.opacity = '0'; // For animation
+            card.className = 'project-card glass-card';
+            card.style.opacity = '0';
 
             const techStack = repo.language || 'Code';
-            card.dataset.lang = techStack; // For ecosystem highlight
-
             card.innerHTML = `
+                <div class="scanline"></div>
                 <div class="project-image" style="background-image: url('${PatternGenerator.generate(repo.name)}')">
                     <div class="project-overlay"></div>
+                </div>
+                <div class="project-content">
                     <div class="project-tech">
                         <span>${techStack}</span>
                         <span>${repo.stargazers_count} ★</span>
                     </div>
-                </div>
-                <div class="project-content">
                     <h3>${repo.name}</h3>
                     <p>${repo.description || 'Exploring the unknown...'}</p>
                     <div class="project-links">
@@ -103,44 +97,17 @@ class UNXAIApp {
                 </div>
             `;
 
-            // Ecosystem Highlight Interaction
-            card.addEventListener('mouseenter', () => {
-                const allCards = document.querySelectorAll('.project-card');
-                const lang = card.dataset.lang;
-
-                allCards.forEach(c => {
-                    if (c.dataset.lang === lang) {
-                        c.classList.add('highlight');
-                        c.classList.remove('dim');
-                    } else {
-                        c.classList.add('dim');
-                        c.classList.remove('highlight');
-                    }
-                });
-            });
-
-            card.addEventListener('mouseleave', () => {
-                const allCards = document.querySelectorAll('.project-card');
-                allCards.forEach(c => {
-                    c.classList.remove('dim', 'highlight');
-                });
-            });
-
             container.appendChild(card);
 
-            // Staggered Animation
             gsap.to(card, {
                 opacity: 1,
                 y: 0,
                 duration: 0.5,
-                delay: index * 0.05, // Faster stagger for many items
-                scrollTrigger: {
-                    trigger: container,
-                    start: "top 80%"
-                }
+                delay: index * 0.05
             });
         });
 
+        new CarouselController(container);
         this.terminal.log(`Loaded ${projects.length} Project Modules.`);
     }
 
@@ -179,6 +146,9 @@ class UNXAIApp {
         });
 
         this.terminal.log(`Identified ${members.length} Active Agents.`);
+
+        // Initialize Carousel
+        new CarouselController(container);
     }
 
     // === 3D System ===
@@ -408,6 +378,144 @@ class UNXAIApp {
 }
 
 /**
+ * Carousel Controller
+ * Handles team carousel logic
+ */
+class CarouselController {
+    constructor(container) {
+        this.container = container;
+        this.prevBtn = this.container.parentElement?.querySelector('.carousel-btn.prev') || null;
+        this.nextBtn = this.container.parentElement?.querySelector('.carousel-btn.next') || null;
+        this.items = [];
+        this.autoScrollInterval = null;
+        this.isHovered = false;
+
+        this.init();
+    }
+
+    init() {
+        // Wait for items to be rendered
+        setTimeout(() => {
+            this.items = Array.from(this.container.children);
+            if (this.items.length === 0) return;
+
+            if (this.items.length === 1) {
+                this.items[0].classList.add('active');
+            }
+
+            this.setupEventListeners();
+            this.centerItem(0);
+            this.updateActiveItem();
+            this.startAutoScroll();
+        }, 100);
+    }
+
+    setupEventListeners() {
+        this.prevBtn?.addEventListener('click', () => {
+            this.scroll('left');
+            this.resetAutoScroll();
+        });
+
+        this.nextBtn?.addEventListener('click', () => {
+            this.scroll('right');
+            this.resetAutoScroll();
+        });
+
+        this.container.addEventListener('scroll', () => {
+            this.updateActiveItem();
+        });
+
+        this.container.addEventListener('mouseenter', () => {
+            this.isHovered = true;
+            this.stopAutoScroll();
+        });
+
+        this.container.addEventListener('mouseleave', () => {
+            this.isHovered = false;
+            this.startAutoScroll();
+        });
+    }
+
+    scroll(direction) {
+        const scrollAmount = 300; // Approx item width + gap
+        const currentScroll = this.container.scrollLeft;
+        const targetScroll = direction === 'left'
+            ? currentScroll - scrollAmount
+            : currentScroll + scrollAmount;
+
+        this.container.scrollTo({
+            left: targetScroll,
+            behavior: 'smooth'
+        });
+    }
+
+    updateActiveItem() {
+        const left = this.container.scrollLeft;
+        const right = left + this.container.offsetWidth;
+        const nearLeftEdge = left <= 2;
+        const nearRightEdge = right >= this.container.scrollWidth - 2;
+
+        if (nearLeftEdge) {
+            this.items.forEach((item, idx) => item.classList.toggle('active', idx === 0));
+            return;
+        }
+
+        if (nearRightEdge) {
+            const lastIdx = this.items.length - 1;
+            this.items.forEach((item, idx) => item.classList.toggle('active', idx === lastIdx));
+            return;
+        }
+
+        const center = left + this.container.offsetWidth / 2;
+        let bestIdx = 0;
+        let bestDist = Infinity;
+        this.items.forEach((item, idx) => {
+            const itemCenter = item.offsetLeft + item.offsetWidth / 2;
+            const dist = Math.abs(center - itemCenter);
+            if (dist < bestDist) {
+                bestDist = dist;
+                bestIdx = idx;
+            }
+        });
+        this.items.forEach((item, idx) => item.classList.toggle('active', idx === bestIdx));
+    }
+
+    centerItem(index) {
+        const item = this.items[index];
+        if (!item) return;
+        const targetLeft = Math.max(0, item.offsetLeft + item.offsetWidth / 2 - this.container.offsetWidth / 2);
+        this.container.scrollTo({ left: targetLeft, behavior: 'auto' });
+    }
+
+    startAutoScroll() {
+        if (this.autoScrollInterval) return;
+
+        this.autoScrollInterval = setInterval(() => {
+            if (!this.isHovered) {
+                // Check if we reached the end
+                if (this.container.scrollLeft + this.container.offsetWidth >= this.container.scrollWidth - 10) {
+                    this.container.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    this.scroll('right');
+                }
+            }
+        }, 3000);
+    }
+
+    stopAutoScroll() {
+        if (this.autoScrollInterval) {
+            clearInterval(this.autoScrollInterval);
+            this.autoScrollInterval = null;
+        }
+    }
+
+    resetAutoScroll() {
+        this.stopAutoScroll();
+        this.startAutoScroll();
+    }
+}
+
+/**
  * GitHub Service
  * Handles data fetching with fallback
  */
@@ -416,14 +524,13 @@ class GitHubService {
         this.org = 'unxai';
         this.terminal = terminal;
         this.fallbackRepos = [
-            { name: 'monitor-mcp-server', description: 'MCP-based system monitoring server for Mac.', html_url: '#', language: 'Python', stargazers_count: 12 },
-            { name: 'magic-cube-app', description: 'Elasticsearch tool with AI chat.', html_url: '#', language: 'TypeScript', stargazers_count: 45 },
-            { name: 'geonames-service', description: 'Go-based geolocation data service.', html_url: '#', language: 'Go', stargazers_count: 8 },
-            { name: 'Inkwell', description: 'Creative space for digital expression.', html_url: '#', language: 'Vue', stargazers_count: 23 }
+            { name: 'monitor-mcp-server', description: 'MCP-based system monitoring server for Mac.', html_url: 'https://github.com/unxai/monitor-mcp-server', language: 'Python', stargazers_count: 1 },
+            { name: 'magic-cube-app', description: 'Elasticsearch tool with AI chat.', html_url: 'https://github.com/unxai/magic-cube-app', language: 'TypeScript', stargazers_count: 1 },
+            { name: 'geonames-service', description: 'Go-based geolocation data service.', html_url: 'https://github.com/unxai/geonames-service', language: 'Go', stargazers_count: 1 },
+            { name: 'Inkwell', description: 'Creative space for digital expression.', html_url: 'https://github.com/unxai/Inkwell', language: 'Vue', stargazers_count: 1 }
         ];
         this.fallbackMembers = [
-            { login: 'Alex Chen', avatar_url: 'https://avatars.githubusercontent.com/u/1?v=4', html_url: '#' },
-            { login: 'Sarah Wu', avatar_url: 'https://avatars.githubusercontent.com/u/2?v=4', html_url: '#' }
+            { login: 'Xiaobei Song', avatar_url: 'https://avatars.githubusercontent.com/u/6057437?v=4', html_url: 'https://github.com/xiaobeicn' },
         ];
     }
 
@@ -659,6 +766,45 @@ class PatternGenerator {
                 ctx.stroke();
             }
         }
+        ctx.globalCompositeOperation = 'source-over';
+        const name = String(seedString || '').trim();
+        const upper = name.toUpperCase();
+        const baseSize = 72;
+        let fontSize = baseSize;
+        ctx.font = `800 ${fontSize}px Outfit, Inter, sans-serif`;
+        let textWidth = ctx.measureText(upper).width;
+        const maxWidth = width * 0.85;
+        if (textWidth > maxWidth) {
+            fontSize = Math.max(28, Math.floor(fontSize * (maxWidth / textWidth)));
+            ctx.font = `800 ${fontSize}px Outfit, Inter, sans-serif`;
+            textWidth = ctx.measureText(upper).width;
+        }
+        ctx.save();
+        ctx.translate(width / 2, height / 2);
+        ctx.rotate(-Math.PI / 8);
+        ctx.globalAlpha = 0.08;
+        ctx.fillStyle = '#ffffff';
+        const tile = 160;
+        for (let x = -width; x < width; x += tile) {
+            for (let y = -height; y < height; y += 60) {
+                ctx.fillText(upper, x, y);
+            }
+        }
+        ctx.restore();
+        const textGradient = ctx.createLinearGradient(0, 0, width, 0);
+        textGradient.addColorStop(0, '#ffffff');
+        textGradient.addColorStop(1, '#8b5cf6');
+        ctx.fillStyle = textGradient;
+        ctx.shadowBlur = 14;
+        ctx.shadowColor = '#3b82f6';
+        ctx.globalAlpha = 0.95;
+        const tx = (width - textWidth) / 2;
+        const ty = Math.floor(height * 0.62);
+        ctx.fillText(upper, tx, ty);
+        ctx.shadowBlur = 0;
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.strokeText(upper, tx, ty);
 
         // Add Noise Texture
         const imageData = ctx.getImageData(0, 0, width, height);
