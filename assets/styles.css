@@ -148,6 +148,7 @@ img {
     margin-bottom: 1rem;
     background: linear-gradient(135deg, #fff, #888);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -302,34 +303,36 @@ img {
 
 .hero-content {
     text-align: center;
-    max-width: 800px;
     padding: 0 2rem;
     z-index: 1;
 }
 
 .hero-badge {
     display: inline-flex;
+    justify-content: center;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 1rem;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 99px;
-    font-size: 0.75rem;
-    font-family: var(--font-mono);
-    color: var(--accent-primary);
     margin-bottom: 2rem;
     opacity: 0;
     animation: fadeUp 0.8s var(--ease-out) 0.5s forwards;
 }
 
-.pulse-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--accent-primary);
-    border-radius: 50%;
-    box-shadow: 0 0 10px var(--accent-primary);
-    animation: pulse 2s infinite;
+.hero-logo-img {
+    width: 80px;
+    height: 80px;
+    filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .hero-title {
@@ -355,6 +358,7 @@ img {
 .highlight {
     background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
 }
@@ -461,6 +465,7 @@ img {
     margin-bottom: 1rem;
     background: linear-gradient(to right, #fff, #888);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -503,7 +508,9 @@ img {
 /* Projects Grid */
 .projects-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-auto-flow: dense;
+    /* Pack items efficiently */
     gap: 2.5rem;
 }
 
@@ -511,6 +518,35 @@ img {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    transition: all 0.4s var(--ease-out);
+    /* Smooth transition for hover effects */
+}
+
+/* Featured Projects (Span 2 columns on large screens) */
+@media (min-width: 768px) {
+    .project-card.featured {
+        grid-column: span 2;
+    }
+
+    .project-card.featured .project-image {
+        height: 300px;
+        /* Taller image for featured */
+    }
+}
+
+/* Ecosystem Highlight Interactions */
+.project-card.dim {
+    opacity: 0.2;
+    filter: grayscale(100%);
+    transform: scale(0.95);
+}
+
+.project-card.highlight {
+    opacity: 1;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+    z-index: 10;
+    transform: translateY(-10px);
 }
 
 .project-image {
@@ -520,6 +556,7 @@ img {
     background-position: center;
     position: relative;
     overflow: hidden;
+    transition: height 0.3s ease;
 }
 
 .project-overlay {

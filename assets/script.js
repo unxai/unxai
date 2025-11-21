@@ -70,12 +70,21 @@ class UNXAIApp {
 
         container.innerHTML = ''; // Clear loading state
 
+        // Sort by stars descending
+        projects.sort((a, b) => b.stargazers_count - a.stargazers_count);
+
+        // Determine featured threshold (top 20%)
+        const featuredThreshold = projects.length > 5 ? Math.floor(projects.length * 0.2) : 0;
+
         projects.forEach((repo, index) => {
             const card = document.createElement('article');
-            card.className = 'project-card glass-card';
+            const isFeatured = index < featuredThreshold;
+
+            card.className = `project-card glass-card ${isFeatured ? 'featured' : ''}`;
             card.style.opacity = '0'; // For animation
 
             const techStack = repo.language || 'Code';
+            card.dataset.lang = techStack; // For ecosystem highlight
 
             card.innerHTML = `
                 <div class="project-image" style="background-image: url('${PatternGenerator.generate(repo.name)}')">
@@ -94,6 +103,29 @@ class UNXAIApp {
                 </div>
             `;
 
+            // Ecosystem Highlight Interaction
+            card.addEventListener('mouseenter', () => {
+                const allCards = document.querySelectorAll('.project-card');
+                const lang = card.dataset.lang;
+
+                allCards.forEach(c => {
+                    if (c.dataset.lang === lang) {
+                        c.classList.add('highlight');
+                        c.classList.remove('dim');
+                    } else {
+                        c.classList.add('dim');
+                        c.classList.remove('highlight');
+                    }
+                });
+            });
+
+            card.addEventListener('mouseleave', () => {
+                const allCards = document.querySelectorAll('.project-card');
+                allCards.forEach(c => {
+                    c.classList.remove('dim', 'highlight');
+                });
+            });
+
             container.appendChild(card);
 
             // Staggered Animation
@@ -101,7 +133,7 @@ class UNXAIApp {
                 opacity: 1,
                 y: 0,
                 duration: 0.5,
-                delay: index * 0.1,
+                delay: index * 0.05, // Faster stagger for many items
                 scrollTrigger: {
                     trigger: container,
                     start: "top 80%"
@@ -397,7 +429,7 @@ class GitHubService {
 
     async getRepositories() {
         try {
-            const response = await fetch(`https://api.github.com/users/${this.org}/repos?sort=updated&per_page=6`);
+            const response = await fetch(`https://api.github.com/users/${this.org}/repos?sort=updated&per_page=100`);
             if (!response.ok) throw new Error('API Error');
             const data = await response.json();
             return data;
